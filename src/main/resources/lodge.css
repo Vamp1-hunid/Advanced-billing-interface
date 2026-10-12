@@ -353,6 +353,8 @@
 
 /* ---------- Pop-up windows (receipt, confirm, about) ---------- */
 .dialog-pane { -fx-background-color: -popup-bg; }
+/* a dialog is its own scene root, so it would inherit the slat picture from .root */
+.root.dialog-pane, .root.dark.dialog-pane { -fx-background-image: none; }
 .dialog-pane > .header-panel { -fx-background-color: -popup-hover; }
 .dialog-pane .label { -fx-text-fill: -text; }
 .dialog-pane > .button-bar > .container { -fx-background-color: -popup-bg; }

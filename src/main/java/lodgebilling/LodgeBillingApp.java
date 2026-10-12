@@ -1,11 +1,13 @@
 package lodgebilling;
 
+import javafx.animation.FadeTransition;
 import javafx.application.Application;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import lodgebilling.controller.BillingController;
 import lodgebilling.model.AuthService;
 import lodgebilling.model.BillingModel;
@@ -47,6 +49,12 @@ public class LodgeBillingApp extends Application {
         });
         swapScene(stage, controller.view());
         controller.view().install(stage.getScene());
+
+        // The billing window fades in after the login card has faded out
+        controller.view().setOpacity(0);
+        FadeTransition fadeIn = new FadeTransition(Duration.millis(500), controller.view());
+        fadeIn.setToValue(1);
+        fadeIn.play();
     }
 
     /** Puts a new screen in the window with a fresh scene, keeping the size if it is already open. */
