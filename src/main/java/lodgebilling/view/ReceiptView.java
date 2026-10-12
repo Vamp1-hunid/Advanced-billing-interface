@@ -111,7 +111,7 @@ public class ReceiptView extends VBox {
         return box;
     }
 
-    /** Decorative barcode: the same bill number always gives the same bars. */
+    /** Decorative barcode: the same receipt number always gives the same bars. */
     private Node barcode(Bill bill) {
         Random random = new Random(bill.getReceiptNumber().hashCode());
         HBox bars = new HBox(2);

@@ -51,21 +51,21 @@ public class Bill {
         this.balance = total.subtract(this.paid);
     }
 
-    /** Builds a bill from validated form values. Use an empty id for an unsaved preview. */
+    /** Builds a bill from validated form values. Use an empty receipt number for an unsaved preview. */
     public static Bill of(String receiptNumber, BillInput in) {
         return new Bill(receiptNumber, in.name(), in.room(), in.nights(), in.extras(), in.paid(), in.notes());
     }
 
-    public String getReceiptNumber()         { return receiptNumber; }
-    public String getGuestName()      { return guestName; }
-    public RoomType getRoomType()     { return roomType; }
-    public int getNights()            { return nights; }
-    public BigDecimal getExtras()     { return extras; }
-    public BigDecimal getPaid()       { return paid; }
-    public String getNotes()          { return notes; }
-    public LocalDateTime getIssuedAt() { return issuedAt; }
-    public BigDecimal getRoomCharge() { return roomCharge; }
-    public BigDecimal getDiscount()   { return discount; }
-    public BigDecimal getTotal()      { return total; }
-    public BigDecimal getBalance()    { return balance; }
+    public String getReceiptNumber()    { return receiptNumber; }
+    public String getGuestName()        { return guestName; }
+    public RoomType getRoomType()       { return roomType; }
+    public int getNights()              { return nights; }
+    public BigDecimal getExtras()       { return extras; }
+    public BigDecimal getPaid()         { return paid; }
+    public String getNotes()            { return notes; }
+    public LocalDateTime getIssuedAt()  { return issuedAt; }
+    public BigDecimal getRoomCharge()   { return roomCharge; }
+    public BigDecimal getDiscount()     { return discount; }
+    public BigDecimal getTotal()        { return total; }
+    public BigDecimal getBalance()      { return balance; }
 }

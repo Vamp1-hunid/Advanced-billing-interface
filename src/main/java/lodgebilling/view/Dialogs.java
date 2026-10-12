@@ -120,7 +120,7 @@ public class Dialogs {
         confirm.setTitle("Confirm deletion");
         confirm.setHeaderText("Delete the selected receipt?");
 
-        // Make Cancel the safe default: Enter or a stray key press keeps the bill
+        // Make Cancel the safe default: Enter or a stray key press keeps the receipt
         Button deleteButton = (Button) confirm.getDialogPane().lookupButton(delete);
         Button cancelButton = (Button) confirm.getDialogPane().lookupButton(ButtonType.CANCEL);
         deleteButton.setDefaultButton(false);
