@@ -17,7 +17,7 @@ public class AppMenuBar extends MenuBar {
         MenuItem newGuest = item("_New guest", "Shortcut+N", actions::newGuest);
         MenuItem receipt = item("View _receipt", "Shortcut+R", actions::viewReceipt);
         MenuItem print = item("_Print receipt", "Shortcut+P", actions::printReceipt);
-        MenuItem delete = item("_Delete selected bill", "Shortcut+D", actions::deleteSelected);
+        MenuItem delete = item("_Delete selected receipt", "Shortcut+D", actions::deleteSelected);
         MenuItem logout = item("_Log out", "Shortcut+L", actions::logout);
         MenuItem close = item("_Close", "Shortcut+Q", actions::exit);
 

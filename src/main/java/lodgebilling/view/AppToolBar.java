@@ -13,7 +13,7 @@ import lodgebilling.model.BillingModel;
 public class AppToolBar extends ToolBar {
 
     private final Button receiptButton = new Button("View receipt");
-    private final Button deleteButton = new Button("Delete selected bill");
+    private final Button deleteButton = new Button("Delete selected receipt");
 
     public AppToolBar(BillingActions actions, BillingModel model) {
         Button newGuestButton = new Button("New guest");

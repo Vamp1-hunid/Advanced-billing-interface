@@ -13,16 +13,16 @@ public class BillDao {
 
     private final ObservableList<Bill> bills = FXCollections.observableArrayList();
 
-    private int nextBillNumber = 1;
+    private int nextReceiptNumber = 1;
 
     /** Every saved bill; the list is observable so views can follow changes. */
     public ObservableList<Bill> findAll() {
         return bills;
     }
 
-    /** Creates, stores and returns a new bill with the next number (B001, B002, ...). */
+    /** Creates, stores and returns a new bill with the next number (R001, R002, ...). */
     public Bill save(BillInput input) {
-        Bill bill = Bill.of(String.format("B%03d", nextBillNumber++), input);
+        Bill bill = Bill.of(String.format("R%03d", nextReceiptNumber++), input);
         bills.add(bill);
         return bill;
     }

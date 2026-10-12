@@ -11,7 +11,7 @@ import javafx.beans.property.SimpleObjectProperty;
 public class BillingModel {
 
     private static final StatusMessage READY =
-            StatusMessage.info("Enter the guest's details, then calculate or save the bill.");
+            StatusMessage.info("Enter the guest's details, then calculate or save the receipt.");
 
     private final ObjectProperty<StatusMessage> status = new SimpleObjectProperty<>(READY);
     private final ObjectProperty<Theme> theme = new SimpleObjectProperty<>(Theme.LIGHT);

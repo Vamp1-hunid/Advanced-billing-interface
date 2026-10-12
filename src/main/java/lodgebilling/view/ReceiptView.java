@@ -37,7 +37,7 @@ public class ReceiptView extends VBox {
         body.getChildren().addAll(
                 header(),
                 dottedRule(),
-                infoRow("Bill no.", bill.getBillId()),
+                infoRow("Receipt no.", bill.getReceiptNumber()),
                 infoRow("Date", bill.getIssuedAt().format(DATE_FORMAT)),
                 infoRow("Guest", bill.getGuestName()),
                 dottedRule(),
@@ -113,7 +113,7 @@ public class ReceiptView extends VBox {
 
     /** Decorative barcode: the same bill number always gives the same bars. */
     private Node barcode(Bill bill) {
-        Random random = new Random(bill.getBillId().hashCode());
+        Random random = new Random(bill.getReceiptNumber().hashCode());
         HBox bars = new HBox(2);
         bars.setAlignment(Pos.CENTER);
         for (int i = 0; i < 38; i++) {
@@ -121,7 +121,7 @@ public class ReceiptView extends VBox {
             bar.setFill(Color.rgb(25, 25, 25));
             bars.getChildren().add(bar);
         }
-        VBox box = new VBox(4, bars, text(bill.getBillId(), "receipt-small"));
+        VBox box = new VBox(4, bars, text(bill.getReceiptNumber(), "receipt-small"));
         box.setAlignment(Pos.CENTER);
         box.setPadding(new Insets(10, 0, 6, 0));
         return box;

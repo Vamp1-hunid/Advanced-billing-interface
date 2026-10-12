@@ -52,7 +52,7 @@ public class MainView extends BorderPane {
         HBox.setHgrow(form, Priority.ALWAYS);
         HBox formAndPrices = new HBox(16, form, new PricePanel());
 
-        Label savedLabel = new Label("Saved bills");
+        Label savedLabel = new Label("Saved receipts");
         savedLabel.getStyleClass().add("card-title");
         VBox.setVgrow(table, Priority.ALWAYS);
         VBox tableCard = new VBox(10, savedLabel, table);

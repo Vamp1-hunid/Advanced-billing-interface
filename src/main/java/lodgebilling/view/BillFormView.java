@@ -27,7 +27,7 @@ import lodgebilling.model.BillValidator;
 import lodgebilling.model.FormField;
 import lodgebilling.model.StatusMessage;
 
-/** The "New bill" card: the input fields plus the Calculate and Save buttons. */
+/** The "New receipt" card: the input fields plus the Calculate and Save buttons. */
 public class BillFormView extends VBox {
 
     private static final String ROOM_PROMPT = "Choose a room type";
@@ -41,11 +41,11 @@ public class BillFormView extends VBox {
     private final TextField paidField = new TextField();
     private final TextArea notesArea = new TextArea();
     private final Button calculateButton = new Button("_Calculate");
-    private final Button saveButton = new Button("_Save bill");
+    private final Button saveButton = new Button("_Save receipt");
 
     public BillFormView(BillingActions actions, ObjectProperty<StatusMessage> status) {
         super(12);
-        Label title = new Label("New bill");
+        Label title = new Label("New receipt");
         title.getStyleClass().add("card-title");
 
         configureFields();

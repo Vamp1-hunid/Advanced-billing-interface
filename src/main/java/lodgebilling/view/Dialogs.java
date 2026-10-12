@@ -45,7 +45,7 @@ public class Dialogs {
 
         ButtonType print = new ButtonType("Print receipt", ButtonBar.ButtonData.LEFT);
         Alert dialog = new Alert(Alert.AlertType.INFORMATION, "", print, ButtonType.CLOSE);
-        dialog.setTitle("Receipt " + bill.getBillId());
+        dialog.setTitle("Receipt " + bill.getReceiptNumber());
         dialog.setHeaderText(null);
         dialog.setGraphic(null);
         dialog.getDialogPane().setContent(scroll);
@@ -114,11 +114,11 @@ public class Dialogs {
     public boolean confirmDelete(Bill bill) {
         ButtonType delete = new ButtonType("Delete");
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
-                "Delete bill " + bill.getBillId() + " for " + bill.getGuestName()
+                "Delete receipt " + bill.getReceiptNumber() + " for " + bill.getGuestName()
                         + " (" + Money.format(bill.getTotal()) + ")?",
                 delete, ButtonType.CANCEL);
         confirm.setTitle("Confirm deletion");
-        confirm.setHeaderText("Delete the selected bill?");
+        confirm.setHeaderText("Delete the selected receipt?");
 
         // Make Cancel the safe default: Enter or a stray key press keeps the bill
         Button deleteButton = (Button) confirm.getDialogPane().lookupButton(delete);
@@ -135,8 +135,8 @@ public class Dialogs {
         Alert about = new Alert(Alert.AlertType.INFORMATION);
         about.setTitle("About");
         about.setHeaderText("Lodge Billing");
-        about.setContentText("Enter a guest, calculate the bill, save it, then view or delete "
-                + "saved bills from the table.");
+        about.setContentText("Enter a guest, calculate the bill, save it as a receipt, then view or delete "
+                + "saved receipts from the table.");
         show(about);
     }
 

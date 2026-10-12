@@ -17,8 +17,8 @@ import java.math.BigDecimal;
 public class BillTableView extends TableView<Bill> {
 
     public BillTableView(ObservableList<Bill> bills, Runnable onOpen, Runnable onDelete) {
-        TableColumn<Bill, String> idCol = new TableColumn<>("Bill");
-        idCol.setCellValueFactory(new PropertyValueFactory<>("billId"));
+        TableColumn<Bill, String> idCol = new TableColumn<>("Receipt no.");
+        idCol.setCellValueFactory(new PropertyValueFactory<>("receiptNumber"));
 
         TableColumn<Bill, String> guestCol = new TableColumn<>("Guest");
         guestCol.setCellValueFactory(new PropertyValueFactory<>("guestName"));
@@ -39,7 +39,7 @@ public class BillTableView extends TableView<Bill> {
         getColumns().add(moneyColumn("Balance", "balance"));
 
         setItems(bills);
-        setPlaceholder(new Label("No bills saved yet."));
+        setPlaceholder(new Label("No receipts saved yet."));
         // Columns share the full width in proportion to their preferred widths,
         // so the table fills its card with no empty strip and no scrollbar
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);

@@ -76,8 +76,8 @@ public class BillingController implements BillingActions {
 
         Bill existing = dao.findByGuest(input.name());
         if (existing != null) {
-            model.setStatus(StatusMessage.error("A bill for " + existing.getGuestName()
-                    + " is already saved as " + existing.getBillId() + ".", FormField.NAME));
+            model.setStatus(StatusMessage.error("A receipt for " + existing.getGuestName()
+                    + " is already saved as " + existing.getReceiptNumber() + ".", FormField.NAME));
             view.focusField(FormField.NAME);
             return;
         }
@@ -85,7 +85,7 @@ public class BillingController implements BillingActions {
         Bill bill = dao.save(input);
         view.clearForm();
         model.setStatus(StatusMessage.success(
-                "Saved " + bill.getBillId() + ". Balance: " + Money.format(bill.getBalance())));
+                "Saved " + bill.getReceiptNumber() + ". Balance: " + Money.format(bill.getBalance())));
         view.scrollToBill(bill);
     }
 
@@ -101,7 +101,7 @@ public class BillingController implements BillingActions {
     public void viewReceipt() {
         Bill selected = view.selectedBill();
         if (selected == null) {
-            model.setStatus(StatusMessage.error("Select a bill to view its receipt."));
+            model.setStatus(StatusMessage.error("Select a receipt to view it."));
             view.focusTable();
             return;
         }
@@ -112,7 +112,7 @@ public class BillingController implements BillingActions {
     public void printReceipt() {
         Bill selected = view.selectedBill();
         if (selected == null) {
-            model.setStatus(StatusMessage.error("Select a bill to print its receipt."));
+            model.setStatus(StatusMessage.error("Select a receipt to print it."));
             view.focusTable();
             return;
         }
@@ -123,7 +123,7 @@ public class BillingController implements BillingActions {
     @Override
     public void printReceiptFor(Bill bill) {
         if (view.printReceipt(bill)) {
-            model.setStatus(StatusMessage.success("Receipt " + bill.getBillId() + " sent to the printer."));
+            model.setStatus(StatusMessage.success("Receipt " + bill.getReceiptNumber() + " sent to the printer."));
         }
     }
 
@@ -131,7 +131,7 @@ public class BillingController implements BillingActions {
     public void deleteSelected() {
         Bill selected = view.selectedBill();
         if (selected == null) {
-            model.setStatus(StatusMessage.error("Select a bill to delete."));
+            model.setStatus(StatusMessage.error("Select a receipt to delete."));
             view.focusTable();
             return;
         }
@@ -142,7 +142,7 @@ public class BillingController implements BillingActions {
         }
         dao.delete(selected);
         view.clearSelection();
-        model.setStatus(StatusMessage.success("Bill " + selected.getBillId() + " deleted."));
+        model.setStatus(StatusMessage.success("Receipt " + selected.getReceiptNumber() + " deleted."));
     }
 
     @Override

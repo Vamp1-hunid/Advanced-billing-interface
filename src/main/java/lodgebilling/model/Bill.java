@@ -13,7 +13,7 @@ public class Bill {
     public static final int DISCOUNT_MIN_NIGHTS = 5;
     public static final BigDecimal DISCOUNT_RATE = new BigDecimal("0.05"); // 5% off the room charge
 
-    private final String billId;
+    private final String receiptNumber;
     private final String guestName;
     private final RoomType roomType;
     private final int nights;
@@ -28,9 +28,9 @@ public class Bill {
     private final BigDecimal total;
     private final BigDecimal balance;
 
-    public Bill(String billId, String guestName, RoomType roomType, int nights,
+    public Bill(String receiptNumber, String guestName, RoomType roomType, int nights,
                 BigDecimal extras, BigDecimal paid, String notes) {
-        this.billId = billId;
+        this.receiptNumber = receiptNumber;
         this.guestName = guestName;
         this.roomType = roomType;
         this.nights = nights;
@@ -52,11 +52,11 @@ public class Bill {
     }
 
     /** Builds a bill from validated form values. Use an empty id for an unsaved preview. */
-    public static Bill of(String billId, BillInput in) {
-        return new Bill(billId, in.name(), in.room(), in.nights(), in.extras(), in.paid(), in.notes());
+    public static Bill of(String receiptNumber, BillInput in) {
+        return new Bill(receiptNumber, in.name(), in.room(), in.nights(), in.extras(), in.paid(), in.notes());
     }
 
-    public String getBillId()         { return billId; }
+    public String getReceiptNumber()         { return receiptNumber; }
     public String getGuestName()      { return guestName; }
     public RoomType getRoomType()     { return roomType; }
     public int getNights()            { return nights; }
