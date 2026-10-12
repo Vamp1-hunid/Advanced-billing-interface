@@ -1,6 +1,7 @@
 package lodgebilling.controller;
 
 import javafx.stage.Stage;
+import lodgebilling.BillDao;
 import lodgebilling.model.Bill;
 import lodgebilling.model.BillInput;
 import lodgebilling.model.BillValidator;
@@ -22,16 +23,18 @@ import java.util.Optional;
 public class BillingController implements BillingActions {
 
     private final BillingModel model;
+    private final BillDao dao;
     private final BillValidator validator = new BillValidator();
     private final Stage stage;
     private final MainView view;
     private final Runnable onLogout;
 
-    public BillingController(BillingModel model, Stage stage, Runnable onLogout) {
+    public BillingController(BillingModel model, BillDao dao, Stage stage, Runnable onLogout) {
         this.model = model;
+        this.dao = dao;
         this.stage = stage;
         this.onLogout = onLogout;
-        this.view = new MainView(model, this, stage);
+        this.view = new MainView(model, dao.findAll(), this, stage);
     }
 
     public MainView view() {
@@ -71,7 +74,7 @@ public class BillingController implements BillingActions {
         }
         BillInput input = read.get();
 
-        Bill existing = model.findByGuest(input.name());
+        Bill existing = dao.findByGuest(input.name());
         if (existing != null) {
             model.setStatus(StatusMessage.error("A bill for " + existing.getGuestName()
                     + " is already saved as " + existing.getBillId() + ".", FormField.NAME));
@@ -79,7 +82,7 @@ public class BillingController implements BillingActions {
             return;
         }
 
-        Bill bill = model.save(input);
+        Bill bill = dao.save(input);
         view.clearForm();
         model.setStatus(StatusMessage.success(
                 "Saved " + bill.getBillId() + ". Balance: " + Money.format(bill.getBalance())));
@@ -137,7 +140,7 @@ public class BillingController implements BillingActions {
             model.setStatus(StatusMessage.info("Deletion cancelled."));
             return;
         }
-        model.delete(selected);
+        dao.delete(selected);
         view.clearSelection();
         model.setStatus(StatusMessage.success("Bill " + selected.getBillId() + " deleted."));
     }

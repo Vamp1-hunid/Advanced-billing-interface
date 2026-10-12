@@ -23,6 +23,7 @@ public class LodgeBillingApp extends Application {
 
     private final AuthService auth = new AuthService();
     private final BillingModel model = new BillingModel();
+    private final BillDao dao = new BillDao();
 
     @Override
     public void start(Stage stage) {
@@ -40,7 +41,7 @@ public class LodgeBillingApp extends Application {
     }
 
     private void showMain(Stage stage) {
-        BillingController controller = new BillingController(model, stage, () -> {
+        BillingController controller = new BillingController(model, dao, stage, () -> {
             auth.logout();
             showLogin(stage);
         });

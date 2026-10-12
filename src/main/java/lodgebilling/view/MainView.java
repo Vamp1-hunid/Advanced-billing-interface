@@ -1,6 +1,7 @@
 package lodgebilling.view;
 
 import javafx.application.Platform;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
@@ -29,9 +30,9 @@ public class MainView extends BorderPane {
     private final Dialogs dialogs;
     private final ScrollPane scroll;
 
-    public MainView(BillingModel model, BillingActions actions, Stage stage) {
+    public MainView(BillingModel model, ObservableList<Bill> bills, BillingActions actions, Stage stage) {
         this.form = new BillFormView(actions, model.statusProperty());
-        this.table = new BillTableView(model.bills(), actions::viewReceipt, actions::deleteSelected);
+        this.table = new BillTableView(bills, actions::viewReceipt, actions::deleteSelected);
         this.toolBar = new AppToolBar(actions, model);
         this.dialogs = new Dialogs(stage, model, actions);
 
