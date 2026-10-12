@@ -1,0 +1,382 @@
+/* =====================================================================
+   Colour palettes. Everything below uses these names, so a theme is just
+   a different set of values. ".dark" is added to the root by the app.
+   Light: black and white only. Dark: black and gold only.
+   Water glass: frosted see-through panels, a bright rim catching light on
+   two opposite corners, a soft highlight across the top and a pooled glow
+   in the bottom corner, floating over slow-moving colour pools.
+   ===================================================================== */
+.root {
+    /* page background gradient and the pools of light behind the glass */
+    -bg-1: #ffffff;
+    -bg-2: #ececec;
+    -bg-3: #d2d2d2;
+    /* glass surfaces */
+    -glass-hi: rgba(255,255,255,0.86);
+    -glass-lo: rgba(255,255,255,0.56);
+    -glass-border: rgba(0,0,0,0.30);
+    -spec: rgba(255,255,255,0.98);
+    -caustic: rgba(255,255,255,0.95);
+    -gloss: rgba(255,255,255,0.80);          /* bright upper half of a glossy surface */
+    -gloss-soft: rgba(255,255,255,0.28);     /* where that half fades out */
+    -streak: rgba(255,255,255,0.65);         /* the diagonal light streak across a panel */
+    -edge: rgba(255,255,255,1.0);
+    -rim: rgba(0,0,0,0.20);
+    -shadow: rgba(0,0,0,0.30);
+    -header-hi: rgba(255,255,255,0.92);
+    -header-lo: rgba(255,255,255,0.74);
+    -bar-bg: rgba(255,255,255,0.94);
+    -toolbar-bg: rgba(255,255,255,0.80);
+    /* text */
+    -text: #111111;
+    -text-muted: #5c5c5c;
+    -title: #000000;
+    /* accent */
+    -accent: #000000;
+    -primary-top: #3a3a3a;
+    -primary-bottom: #000000;
+    -primary-hover-top: #555555;
+    -primary-hover-bottom: #141414;
+    -primary-text: #ffffff;
+    -sel-text: #ffffff;
+    /* inputs and buttons */
+    -input-bg: rgba(255,255,255,0.80);
+    -input-focus: rgba(255,255,255,0.98);
+    -input-border: rgba(0,0,0,0.25);
+    -inset-shadow: rgba(0,0,0,0.28);
+    -btn-bg: rgba(255,255,255,0.72);
+    -btn-hover: rgba(255,255,255,0.96);
+    -btn-shadow: rgba(0,0,0,0.40);
+    /* table */
+    -table-bg: rgba(255,255,255,0.84);
+    -th-bg: rgba(0,0,0,0.08);
+    -row-alt: rgba(0,0,0,0.05);
+    -row-hover: rgba(0,0,0,0.12);
+    -row-selected: #111111;
+    -divider: rgba(0,0,0,0.16);
+    /* pop-ups */
+    -popup-bg: #f4f4f4;
+    -popup-hover: #dcdcdc;
+    /* feedback: shown with weight and contrast instead of colour */
+    -info-bg: rgba(255,255,255,0.84);
+    -err-bg: rgba(205,205,205,0.92);
+    -err-text: #000000;
+    -ok-bg: rgba(255,255,255,0.88);
+    -ok-text: #000000;
+    -danger: #000000;
+    -danger-bg: rgba(0,0,0,0.10);
+
+    -fx-font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    -fx-font-size: 14px;
+    /* the gradient shows only while the picture loads, or if it is missing */
+    -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, -bg-1 0%, -bg-2 55%, -bg-3 100%);
+    -fx-background-image: url("bg-slats.jpg");
+    -fx-background-size: cover;
+    -fx-background-position: center center;
+    -fx-background-repeat: no-repeat;
+}
+
+.root.dark {
+    -bg-1: #000000;
+    -bg-2: #050505;
+    -bg-3: #0b0b0b;
+    -fx-background-image: url("bg-slats-white.jpg");
+    /* solid black panels: no see-through glass, sheen or glow in dark mode */
+    -glass-hi: #0d0d0d;
+    -glass-lo: #070707;
+    -glass-border: rgba(212,175,95,0.70);
+    -spec: transparent;
+    -caustic: transparent;
+    -gloss: transparent;
+    -gloss-soft: transparent;
+    -streak: transparent;
+    -edge: rgba(212,175,95,0.65);
+    -rim: rgba(0,0,0,0.30);
+    -shadow: rgba(0,0,0,0.55);
+    -header-hi: #101010;
+    -header-lo: #060606;
+    -bar-bg: #050505;
+    -toolbar-bg: #0a0a0a;
+    /* gold words */
+    -text: #e8c56c;
+    -text-muted: #b8975a;
+    -title: #f6d98a;
+    -accent: #d4af5f;
+    -primary-top: #e0c070;
+    -primary-bottom: #b8923f;
+    -primary-hover-top: #ecd085;
+    -primary-hover-bottom: #c9a24c;
+    -primary-text: #1a1408;
+    -sel-text: #1a1408;
+    -input-bg: #050505;
+    -input-focus: #141107;
+    -input-border: rgba(212,175,95,0.50);
+    -inset-shadow: rgba(0,0,0,0.80);
+    -btn-bg: #161616;
+    -btn-hover: #2a2410;
+    -btn-shadow: rgba(0,0,0,0.50);
+    -table-bg: #080808;
+    -th-bg: #1c1708;
+    -row-alt: #0f0f0f;
+    -row-hover: #221c0a;
+    -row-selected: #d4af5f;
+    -divider: rgba(212,175,95,0.25);
+    -popup-bg: #0d0d0d;
+    -popup-hover: #2a2310;
+    -info-bg: #121212;
+    -err-bg: #2e2508;
+    -err-text: #ffd36e;
+    -ok-bg: #121212;
+    -ok-text: #e8c56c;
+    -danger: #ffd36e;
+    -danger-bg: #2e2508;
+}
+
+/* ---------- Text ---------- */
+.label { -fx-text-fill: -text; }
+.header { -fx-background-color: linear-gradient(to bottom, -header-hi, -header-lo);
+          -fx-border-color: transparent transparent -edge transparent;
+          -fx-border-width: 0 0 1.5 0;
+          -fx-padding: 14 28 14 28;
+          -fx-effect: dropshadow(gaussian, -shadow, 20, 0, 0, 6); }
+.app-title { -fx-font-family: "Georgia", "Palatino Linotype", serif; -fx-font-size: 26px; -fx-text-fill: -title; }
+.card-title { -fx-font-family: "Georgia", "Palatino Linotype", serif; -fx-font-size: 18px; -fx-text-fill: -title; }
+.price-amount { -fx-font-weight: bold; -fx-text-fill: -title; }
+.hint { -fx-text-fill: -text-muted; -fx-font-size: 13px; }
+
+/* ---------- Light/dark switch: a frosted glass pill (same look in both themes) ---------- */
+.theme-toggle { -fx-cursor: hand; -fx-background-color: transparent; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.40), 14, 0.05, 0, 5); }
+.toggle-track {
+    -fx-background-insets: 0, 1.5;
+    -fx-background-radius: 20, 18.5;
+    -fx-border-color: linear-gradient(to bottom, rgba(255,255,255,0.95), rgba(255,255,255,0.25));
+    -fx-border-width: 1.5;
+    -fx-border-radius: 20;
+}
+.toggle-day {
+    -fx-background-color:
+        linear-gradient(to bottom, rgba(255,255,255,0.92), rgba(205,205,205,0.60)),
+        linear-gradient(to bottom, rgba(255,255,255,0.85), transparent 55%);
+}
+.toggle-night {
+    -fx-background-color:
+        linear-gradient(to bottom, rgba(0,0,0,0.92), rgba(40,32,10,0.80)),
+        linear-gradient(to bottom, rgba(240,205,120,0.35), transparent 55%);
+}
+.theme-toggle:focused .toggle-track { -fx-border-color: -accent; -fx-border-width: 2; }
+.toggle-decoration { -fx-font-size: 13px; -fx-letter-spacing: 1; }
+.toggle-day .toggle-decoration { -fx-text-fill: rgba(0,0,0,0.55); }
+.toggle-night .toggle-decoration { -fx-text-fill: rgba(240,205,120,0.95); }
+.toggle-thumb {
+    -fx-background-color:
+        linear-gradient(to bottom, rgba(255,255,255,0.98), rgba(235,235,235,0.70)),
+        linear-gradient(to bottom, rgba(255,255,255,0.9), transparent 60%);
+    -fx-background-insets: 0, 2;
+    -fx-background-radius: 16, 14;
+    -fx-border-color: rgba(255,255,255,0.9);
+    -fx-border-radius: 16;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.45), 8, 0.05, 0, 3);
+}
+.toggle-icon { -fx-font-family: "Segoe UI Symbol", "Segoe UI Emoji", sans-serif; -fx-font-size: 18px; }
+.toggle-thumb .toggle-sun { -fx-text-fill: #000000; }
+.toggle-thumb .toggle-moon { -fx-text-fill: #8a6a1c; }
+
+/* ---------- Cards: water glass (body, top sheen, pooled bottom-corner glow, rim light) ---------- */
+.card {
+    -fx-background-color:
+        linear-gradient(from 0% 0% to 100% 100%, -glass-hi, -glass-lo),
+        linear-gradient(to bottom, -gloss 0%, -gloss-soft 44%, transparent 50%),
+        radial-gradient(center 16% 8%, radius 68%, -spec 0%, transparent 100%),
+        radial-gradient(center 90% 98%, radius 42%, -caustic 0%, transparent 100%),
+        linear-gradient(to top, -gloss-soft 0%, transparent 16%),
+        linear-gradient(from 0% 0% to 100% 100%, transparent 28%, -streak 36%, transparent 44%);
+    -fx-background-insets: 0, 2, 2, 2, 2, 2;
+    -fx-background-radius: 30, 28, 28, 28, 28, 28;
+    -fx-border-color: linear-gradient(from 0% 0% to 100% 100%, -edge 0%, transparent 38%, transparent 62%, -edge 100%);
+    -fx-border-width: 1.8;
+    -fx-border-radius: 30;
+    -fx-padding: 24;
+    -fx-effect: dropshadow(gaussian, -shadow, 44, 0.06, 0, 18);
+}
+
+/* Dark mode: a plain solid black card with a thin gold edge (no water-glass layers) */
+.root.dark .card {
+    -fx-background-color: -glass-hi;
+    -fx-background-insets: 0;
+    -fx-background-radius: 26;
+    -fx-border-color: -glass-border;
+    -fx-border-width: 1.2;
+    -fx-border-radius: 26;
+    -fx-effect: dropshadow(gaussian, -shadow, 30, 0.05, 0, 10);
+}
+
+/* ---------- Inputs ---------- */
+.text-field, .combo-box-base, .text-area {
+    -fx-background-color: -input-bg;
+    -fx-background-radius: 18;
+    -fx-border-color: -input-border;
+    -fx-border-radius: 18;
+    -fx-text-fill: -text;
+    -fx-prompt-text-fill: -text-muted;
+    -fx-effect: innershadow(gaussian, -inset-shadow, 7, 0.05, 0, 2);
+}
+.text-field { -fx-padding: 10 16 10 16; -fx-font-size: 14px; }
+.combo-box-base { -fx-min-height: 40px; }
+.combo-box-base .arrow { -fx-background-color: -accent; }
+.combo-box-base .list-cell { -fx-text-fill: -text; -fx-padding: 8 12 8 12; }
+.text-area .content { -fx-background-color: transparent; }
+.text-area .text { -fx-fill: -text; }
+.text-area .scroll-pane, .text-area .viewport { -fx-background-color: transparent; }
+.text-field:focused, .combo-box-base:focused, .text-area:focused {
+    -fx-background-color: -input-focus;
+    -fx-border-color: -accent;
+    -fx-border-width: 1.5;
+}
+/* The input an error message is about (set by BillFormView); after :focused so it wins */
+.text-field:error, .combo-box-base:error, .text-area:error {
+    -fx-border-color: -err-text;
+    -fx-border-width: 2;
+    -fx-effect: dropshadow(gaussian, -err-text, 8, 0.2, 0, 0);
+}
+
+/* ---------- Buttons: glass pills with a sheen across the top ---------- */
+.button {
+    -fx-background-color:
+        -btn-bg,
+        linear-gradient(to bottom, -gloss 0%, -gloss-soft 48%, transparent 52%),
+        linear-gradient(to top, -gloss-soft 0%, transparent 28%);
+    -fx-background-insets: 0, 1.5, 1.5;
+    -fx-background-radius: 24, 22.5, 22.5;
+    -fx-border-color: linear-gradient(to bottom, -edge, -input-border);
+    -fx-border-width: 1.5;
+    -fx-border-radius: 24;
+    -fx-effect: dropshadow(gaussian, -btn-shadow, 16, 0.05, 0, 6);
+    -fx-padding: 11 28 11 28;
+    -fx-min-height: 46px;
+    -fx-min-width: 120px;
+    -fx-font-size: 14px;
+    -fx-text-fill: -title;
+    -fx-cursor: hand;
+}
+.button:hover {
+    -fx-background-color:
+        -btn-hover,
+        linear-gradient(to bottom, -gloss 0%, -gloss-soft 48%, transparent 52%),
+        linear-gradient(to top, -gloss-soft 0%, transparent 28%);
+    -fx-effect: dropshadow(gaussian, -btn-shadow, 20, 0.05, 0, 8);
+}
+.button:pressed {
+    -fx-background-color: -input-bg;
+    -fx-background-insets: 0;
+    -fx-effect: innershadow(gaussian, -inset-shadow, 8, 0.1, 0, 3);
+    -fx-translate-y: 1;
+}
+.button:focused { -fx-border-color: -accent; -fx-border-width: 2; }
+.button:default {
+    -fx-background-color:
+        linear-gradient(to bottom, -primary-top, -primary-bottom),
+        linear-gradient(to bottom, rgba(255,255,255,0.35) 0%, transparent 55%);
+    -fx-border-color: linear-gradient(to bottom, -edge, -input-border);
+    -fx-text-fill: -primary-text;
+    -fx-font-weight: bold;
+    -fx-min-width: 150px;
+}
+.button:default:hover {
+    -fx-background-color:
+        linear-gradient(to bottom, -primary-hover-top, -primary-hover-bottom),
+        linear-gradient(to bottom, rgba(255,255,255,0.35) 0%, transparent 55%);
+}
+.button.danger { -fx-text-fill: -danger; }
+.button.danger:hover { -fx-background-color: -danger-bg; -fx-border-color: -danger; }
+
+/* ---------- Menu bar, toolbar, menus ---------- */
+.menu-bar { -fx-background-color: -bar-bg; -fx-border-color: -edge; -fx-border-width: 0 0 1 0; }
+.menu-bar .label { -fx-text-fill: -text; }
+.menu-bar .menu-button:hover, .menu-bar .menu:showing { -fx-background-color: -popup-hover; }
+.tool-bar {
+    -fx-background-color: -toolbar-bg;
+    -fx-border-color: -edge;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 10 20 10 20;
+    -fx-spacing: 10;
+}
+.context-menu { -fx-background-color: -popup-bg; -fx-background-radius: 16; -fx-border-color: -glass-border; -fx-border-radius: 16; -fx-padding: 6; }
+.menu-item .label { -fx-text-fill: -text; -fx-padding: 4 8 4 8; }
+.menu-item:focused { -fx-background-color: -accent; }
+.menu-item:focused .label { -fx-text-fill: -sel-text; }
+.menu-item .accelerator-text { -fx-text-fill: -text-muted; }
+.menu-item:focused .accelerator-text { -fx-text-fill: -sel-text; }
+.combo-box-popup > .list-view { -fx-background-color: -popup-bg; -fx-background-radius: 16; -fx-border-color: -glass-border; -fx-border-radius: 16; }
+.combo-box-popup .list-cell { -fx-background-color: -popup-bg; -fx-text-fill: -text; -fx-padding: 10 14 10 14; }
+.combo-box-popup .list-cell:hover, .combo-box-popup .list-cell:selected { -fx-background-color: -accent; -fx-text-fill: -sel-text; }
+
+/* ---------- Status message ---------- */
+.status {
+    -fx-padding: 12 22 12 22;
+    -fx-background-color: -info-bg, linear-gradient(to bottom, -gloss 0%, -gloss-soft 48%, transparent 52%);
+    -fx-background-insets: 0, 1.5;
+    -fx-background-radius: 24, 22.5;
+    -fx-border-radius: 24;
+    -fx-border-color: linear-gradient(from 0% 0% to 100% 100%, -edge 0%, transparent 50%, -edge 100%);
+    -fx-border-width: 1.5;
+    -fx-text-fill: -title;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, -shadow, 16, 0.05, 0, 5);
+}
+.status.error { -fx-background-color: -err-bg, linear-gradient(to bottom, -gloss 0%, -gloss-soft 48%, transparent 52%); -fx-text-fill: -err-text; -fx-border-color: -err-text; -fx-border-width: 2; }
+.status.success { -fx-background-color: -ok-bg, linear-gradient(to bottom, -gloss 0%, -gloss-soft 48%, transparent 52%); -fx-text-fill: -ok-text; }
+
+/* ---------- Table ---------- */
+.table-view {
+    -fx-background-color: -table-bg;
+    -fx-border-color: linear-gradient(from 0% 0% to 100% 100%, -edge 0%, transparent 50%, -edge 100%);
+    -fx-border-width: 1.5;
+    -fx-background-radius: 22;
+    -fx-border-radius: 22;
+    -fx-padding: 2;
+}
+.table-view .placeholder .label { -fx-text-fill: -text-muted; }
+.table-view .column-header-background { -fx-background-color: -th-bg; -fx-background-radius: 20 20 0 0; }
+.table-view .column-header, .table-view .filler {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent -divider -accent transparent;
+    -fx-border-width: 0 1 1 0;
+    -fx-size: 40;
+}
+.table-view .column-header .label { -fx-font-weight: bold; -fx-text-fill: -title; }
+.table-row-cell { -fx-cell-size: 40; -fx-background-color: transparent; -fx-border-color: transparent transparent -divider transparent; -fx-border-width: 0 0 1 0; }
+.table-row-cell:odd { -fx-background-color: -row-alt; }
+.table-row-cell:hover { -fx-background-color: -row-hover; }
+.table-row-cell:selected { -fx-background-color: -row-selected; }
+.table-row-cell:selected .table-cell { -fx-text-fill: -sel-text; }
+.table-cell { -fx-alignment: CENTER-LEFT; -fx-padding: 0 12 0 12; -fx-text-fill: -text; -fx-border-color: transparent -divider transparent transparent; -fx-border-width: 0 1 0 0; }
+
+/* ---------- Pop-up windows (receipt, confirm, about) ---------- */
+.dialog-pane { -fx-background-color: -popup-bg; }
+.dialog-pane > .header-panel { -fx-background-color: -popup-hover; }
+.dialog-pane .label { -fx-text-fill: -text; }
+.dialog-pane > .button-bar > .container { -fx-background-color: -popup-bg; }
+.dialog-pane .button { -fx-min-width: 110px; }
+
+/* ---------- Receipt: always white paper with dark ink, in both themes ---------- */
+.receipt-paper { -fx-background-color: #fffef8; }
+.receipt-edge { -fx-fill: #fffef8; }
+.receipt-paper .label { -fx-text-fill: #222222; -fx-font-family: "Consolas", "Courier New", monospace; }
+.receipt-title { -fx-font-size: 22px; -fx-font-weight: bold; }
+.receipt-text { -fx-font-size: 13px; }
+.receipt-small { -fx-font-size: 11px; -fx-text-fill: #555555; }
+.receipt-total .label { -fx-font-size: 15px; -fx-font-weight: bold; }
+.receipt-dotted { -fx-border-color: #777777; -fx-border-style: dashed; -fx-border-width: 1 0 0 0; }
+.receipt-solid { -fx-background-color: #222222; }
+.receipt-stamp {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-padding: 4 14 4 14;
+    -fx-border-width: 2;
+    -fx-border-radius: 4;
+    -fx-rotate: -4;
+}
+.receipt-paper .label.receipt-stamp-paid { -fx-text-fill: #1e7a34; -fx-border-color: #1e7a34; }
+.receipt-paper .label.receipt-stamp-due { -fx-text-fill: #b03030; -fx-border-color: #b03030; }
+.main-scroll, .main-scroll > .viewport { -fx-background-color: transparent; -fx-background: transparent; }
+.receipt-scroll, .receipt-scroll > .viewport { -fx-background-color: transparent; -fx-background: transparent; }
