@@ -56,7 +56,7 @@ public class BillTableView extends TableView<Bill> {
         setItems(bills);
         setPlaceholder(new Label("No receipts saved yet."));
         setFixedCellSize(44);
-        setEditable(False);
+        setEditable(false);
         getStyleClass().add("bill-table");
         setStyle("-fx-background-color: white;"+
                 "-fx-border-color:#E2E8f0;"+
@@ -98,7 +98,6 @@ public class BillTableView extends TableView<Bill> {
                 onDelete.run();
                 e.consume();
             }
-            )
         });
     }
 
