@@ -12,9 +12,13 @@ import lodgebilling.model.Money;
 import lodgebilling.model.RoomType;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 /** The table of saved bills, bound directly to the repository's list. */
 public class BillTableView extends TableView<Bill> {
+
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm");
 
     public BillTableView(ObservableList<Bill> bills, Runnable onOpen, Runnable onDelete) {
         TableColumn<Bill, String> idCol = new TableColumn<>("Receipt no.");
@@ -30,7 +34,18 @@ public class BillTableView extends TableView<Bill> {
         nightsCol.setCellValueFactory(new PropertyValueFactory<>("nights"));
         nightsCol.setStyle("-fx-alignment: CENTER;");
 
+        TableColumn<Bill, LocalDateTime> dateCol = new TableColumn<>("Date");
+        dateCol.setCellValueFactory(new PropertyValueFactory<>("issuedAt"));
+        dateCol.setCellFactory(c -> new TableCell<>() {
+            @Override
+            protected void updateItem(LocalDateTime value, boolean empty) {
+                super.updateItem(value, empty);
+                setText(empty || value == null ? null : value.format(DATE_FORMAT));
+            }
+        });
+
         getColumns().add(idCol);
+        getColumns().add(dateCol);
         getColumns().add(guestCol);
         getColumns().add(roomCol);
         getColumns().add(nightsCol);
@@ -44,10 +59,11 @@ public class BillTableView extends TableView<Bill> {
         // so the table fills its card with no empty strip and no scrollbar
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
         idCol.setPrefWidth(90);
-        guestCol.setPrefWidth(220);
-        roomCol.setPrefWidth(120);
+        dateCol.setPrefWidth(140);
+        guestCol.setPrefWidth(200);
+        roomCol.setPrefWidth(110);
         nightsCol.setPrefWidth(70);
-        for (int i = 4; i < getColumns().size(); i++) {
+        for (int i = 5; i < getColumns().size(); i++) {
             getColumns().get(i).setPrefWidth(110);
         }
         setMinHeight(160);
