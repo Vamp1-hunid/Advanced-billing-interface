@@ -11,9 +11,15 @@ repositories {
 }
 
 java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
-    }
+    // Compile with whichever JDK is running Gradle (e.g. JDK 25) instead of
+    // requiring a separate JDK 21 installation, but still target Java 21
+    // bytecode so the project stays compatible with Java 21.
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.release = 21
 }
 
 javafx {
