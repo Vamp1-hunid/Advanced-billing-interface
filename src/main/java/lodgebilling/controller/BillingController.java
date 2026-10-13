@@ -157,6 +157,7 @@ public class BillingController implements BillingActions {
 
     @Override
     public void logout() {
+        view.stopBackground();
         onLogout.run();
     }
 

@@ -4,7 +4,7 @@
    Light: black and white only. Dark: black and gold only.
    Water glass: frosted see-through panels, a bright rim catching light on
    two opposite corners, a soft highlight across the top and a pooled glow
-   in the bottom corner, floating over slow-moving colour pools.
+   in the bottom corner, floating over a slowly moving aurora.
    ===================================================================== */
 .root {
     /* page background gradient and the pools of light behind the glass */
@@ -68,19 +68,14 @@
 
     -fx-font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
     -fx-font-size: 14px;
-    /* the gradient shows only while the picture loads, or if it is missing */
+    /* the animated aurora is drawn on top of this; the gradient shows only around dialogs */
     -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, -bg-1 0%, -bg-2 55%, -bg-3 100%);
-    -fx-background-image: url("bg-slats.jpg");
-    -fx-background-size: cover;
-    -fx-background-position: center center;
-    -fx-background-repeat: no-repeat;
 }
 
 .root.dark {
     -bg-1: #000000;
     -bg-2: #050505;
     -bg-3: #0b0b0b;
-    -fx-background-image: url("bg-slats-white.jpg");
     /* solid black panels: no see-through glass, sheen or glow in dark mode */
     -glass-hi: #0d0d0d;
     -glass-lo: #070707;
@@ -353,8 +348,6 @@
 
 /* ---------- Pop-up windows (receipt, confirm, about) ---------- */
 .dialog-pane { -fx-background-color: -popup-bg; }
-/* a dialog is its own scene root, so it would inherit the slat picture from .root */
-.root.dialog-pane, .root.dark.dialog-pane { -fx-background-image: none; }
 .dialog-pane > .header-panel { -fx-background-color: -popup-hover; }
 .dialog-pane .label { -fx-text-fill: -text; }
 .dialog-pane > .button-bar > .container { -fx-background-color: -popup-bg; }

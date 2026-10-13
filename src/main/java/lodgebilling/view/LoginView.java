@@ -28,7 +28,7 @@ public class LoginView extends StackPane {
     private final PasswordField password = new PasswordField();
     private final Label error = new Label();
     private ChangeListener<Theme> themeListener;
-    private SlatBackground slats;
+    private AuroraBackground aurora;
     private VBox card;
     private ThemeToggle themeToggle;
 
@@ -74,18 +74,14 @@ public class LoginView extends StackPane {
         themeToggle.setFocusTraversable(false);
         StackPane.setAlignment(themeToggle, Pos.TOP_RIGHT);
 
-        // Follow the model's theme, the same way the main window does
-        slats = new SlatBackground(model.themeProperty().get() == Theme.DARK);
-        slats.setManaged(false);
-        themeListener = (obs, old, theme) -> {
-            Styles.apply(theme, this);
-            slats.setDark(theme == Theme.DARK);
-        };
+        aurora = new AuroraBackground();
+        aurora.setManaged(false);
+        themeListener = (obs, old, theme) -> Styles.apply(theme, this);
         Styles.apply(model.themeProperty().get(), this);
         model.themeProperty().addListener(themeListener);
 
         setPadding(new Insets(24));
-        getChildren().addAll(slats, card, themeToggle);
+        getChildren().addAll(aurora, card, themeToggle);
     }
 
     /** The card shrinks and fades away; only then does the billing window open. */
@@ -104,7 +100,7 @@ public class LoginView extends StackPane {
         ParallelTransition exit = new ParallelTransition(cardFade, cardShrink, toggleFade);
         exit.setInterpolator(Interpolator.EASE_IN);
         exit.setOnFinished(e -> {
-            slats.stop();
+            aurora.stop();
             next.run();
         });
         exit.play();
@@ -114,12 +110,14 @@ public class LoginView extends StackPane {
     protected void layoutChildren() {
         super.layoutChildren();
         // the backdrop ignores the padding and fills the whole window
-        slats.resizeRelocate(0, 0, getWidth(), getHeight());
+        aurora.resizeRelocate(0, 0, getWidth(), getHeight());
     }
 
     /** Call once the scene exists. */
     public void install(javafx.scene.Scene scene) {
         scene.getStylesheets().add(Styles.stylesheet());
+        Motion.liftButtons(card);
+        Motion.enter(card, themeToggle);
         Platform.runLater(username::requestFocus);
     }
 

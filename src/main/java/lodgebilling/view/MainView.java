@@ -29,6 +29,11 @@ public class MainView extends BorderPane {
     private final AppToolBar toolBar;
     private final Dialogs dialogs;
     private final ScrollPane scroll;
+    private final AuroraBackground aurora;
+    private final VBox top;
+    private HBox formAndPrices;
+    private StatusBar statusBar;
+    private VBox tableCard;
 
     public MainView(BillingModel model, ObservableList<Bill> bills, BillingActions actions, Stage stage) {
         this.form = new BillFormView(actions, model.statusProperty());
@@ -36,7 +41,13 @@ public class MainView extends BorderPane {
         this.toolBar = new AppToolBar(actions, model);
         this.dialogs = new Dialogs(stage, model, actions);
 
-        setTop(new VBox(new AppMenuBar(actions, model), toolBar, new AppHeader()));
+        // The aurora sits behind everything and fills the whole window
+        aurora = new AuroraBackground();
+        aurora.setManaged(false);
+        getChildren().add(aurora);
+
+        top = new VBox(new AppMenuBar(actions, model), toolBar, new AppHeader());
+        setTop(top);
         scroll = new ScrollPane(buildContent(model));
         scroll.setFitToWidth(true);
         scroll.setFitToHeight(true);
@@ -50,16 +61,17 @@ public class MainView extends BorderPane {
 
     private VBox buildContent(BillingModel model) {
         HBox.setHgrow(form, Priority.ALWAYS);
-        HBox formAndPrices = new HBox(16, form, new PricePanel());
+        formAndPrices = new HBox(16, form, new PricePanel());
 
         Label savedLabel = new Label("Saved receipts");
         savedLabel.getStyleClass().add("card-title");
         VBox.setVgrow(table, Priority.ALWAYS);
-        VBox tableCard = new VBox(10, savedLabel, table);
+        tableCard = new VBox(10, savedLabel, table);
         tableCard.getStyleClass().add("card");
         VBox.setVgrow(tableCard, Priority.ALWAYS);
 
-        VBox content = new VBox(12, formAndPrices, new StatusBar(model.statusProperty()), tableCard);
+        statusBar = new StatusBar(model.statusProperty());
+        VBox content = new VBox(12, formAndPrices, statusBar, tableCard);
         content.setPadding(new Insets(16, 20, 20, 20));
         return content;
     }
@@ -67,6 +79,8 @@ public class MainView extends BorderPane {
     /** Call once the scene exists: focus behaviour that needs the whole scene. */
     public void install(Scene scene) {
         scene.getStylesheets().add(Styles.stylesheet());
+        Motion.liftButtons(this);
+        Motion.enter(top, formAndPrices, statusBar, tableCard);
 
         // Deselect the row when focus leaves the table, except when it goes to
         // a button that needs the selection (View receipt / Delete)
@@ -81,6 +95,18 @@ public class MainView extends BorderPane {
             form.focus(FormField.NAME);
             scroll.setVvalue(0);
         });
+    }
+
+    @Override
+    protected void layoutChildren() {
+        super.layoutChildren();
+        // the backdrop fills the whole window, behind the bars and the cards
+        aurora.resizeRelocate(0, 0, getWidth(), getHeight());
+    }
+
+    /** Stops the background animation, for when this screen is being replaced. */
+    public void stopBackground() {
+        aurora.stop();
     }
 
     // ---------- What the controller can ask of the screen ----------
