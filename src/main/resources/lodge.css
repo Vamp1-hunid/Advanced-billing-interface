@@ -1,70 +1,73 @@
 /* =====================================================================
    Colour palettes. Everything below uses these names, so a theme is just
    a different set of values. ".dark" is added to the root by the app.
-   Light: black and white only. Dark: black and gold only.
-   Water glass: frosted see-through panels, a bright rim catching light on
-   two opposite corners, a soft highlight across the top and a pooled glow
-   in the bottom corner, floating over a slowly moving aurora.
+   Both themes sit over the aurora night sky and borrow its colours:
+   aurora green for actions and focus, violet for selection and edges.
+   Light: frosted ice glass with deep navy ink.
+   Dark: smoked navy glass with mint ink.
    ===================================================================== */
 .root {
-    /* page background gradient and the pools of light behind the glass */
-    -bg-1: #ffffff;
-    -bg-2: #ececec;
-    -bg-3: #d2d2d2;
+    /* page background gradient (seen only behind dialogs) */
+    -bg-1: #f6f9ff;
+    -bg-2: #eaf1fb;
+    -bg-3: #dde6f5;
     /* glass surfaces */
-    -glass-hi: rgba(255,255,255,0.86);
-    -glass-lo: rgba(255,255,255,0.56);
-    -glass-border: rgba(0,0,0,0.30);
-    -spec: rgba(255,255,255,0.98);
-    -caustic: rgba(255,255,255,0.95);
-    -gloss: rgba(255,255,255,0.80);          /* bright upper half of a glossy surface */
-    -gloss-soft: rgba(255,255,255,0.28);     /* where that half fades out */
-    -streak: rgba(255,255,255,0.65);         /* the diagonal light streak across a panel */
-    -edge: rgba(255,255,255,1.0);
-    -rim: rgba(0,0,0,0.20);
-    -shadow: rgba(0,0,0,0.30);
-    -header-hi: rgba(255,255,255,0.92);
-    -header-lo: rgba(255,255,255,0.74);
-    -bar-bg: rgba(255,255,255,0.94);
-    -toolbar-bg: rgba(255,255,255,0.80);
+    -glass-hi: rgba(248,251,255,0.88);
+    -glass-lo: rgba(230,238,252,0.66);
+    -glass-border: rgba(90,110,170,0.35);
+    -spec: rgba(255,255,255,0.95);
+    -caustic: rgba(200,255,235,0.70);        /* a mint glow pooled in the bottom corner */
+    -gloss: rgba(255,255,255,0.78);          /* bright upper half of a glossy surface */
+    -gloss-soft: rgba(255,255,255,0.26);     /* where that half fades out */
+    -streak: rgba(255,255,255,0.55);         /* the diagonal light streak across a panel */
+    -edge: rgba(255,255,255,0.95);           /* rim light, top-left */
+    -edge-2: rgba(122,77,255,0.60);          /* aurora violet rim, bottom-right */
+    -rim: rgba(20,30,70,0.20);
+    -shadow: rgba(0,6,24,0.50);
+    -header-hi: rgba(248,251,255,0.93);
+    -header-lo: rgba(232,240,252,0.82);
+    -bar-bg: rgba(246,249,255,0.95);
+    -toolbar-bg: rgba(238,245,255,0.86);
     /* text */
-    -text: #111111;
-    -text-muted: #5c5c5c;
-    -title: #000000;
+    -text: #16213a;
+    -text-muted: #5a6688;
+    -title: #0b1630;
+    -title-a: #0b8f72;                       /* the app title runs from aurora green... */
+    -title-b: #5b3fc4;                       /* ...to violet */
     /* accent */
-    -accent: #000000;
-    -primary-top: #3a3a3a;
-    -primary-bottom: #000000;
-    -primary-hover-top: #555555;
-    -primary-hover-bottom: #141414;
+    -accent: #0b8f72;
+    -primary-top: #13b58e;                   /* the main button runs left to right */
+    -primary-bottom: #6f46e0;
+    -primary-hover-top: #22cfa3;
+    -primary-hover-bottom: #8158f0;
     -primary-text: #ffffff;
     -sel-text: #ffffff;
     /* inputs and buttons */
-    -input-bg: rgba(255,255,255,0.80);
-    -input-focus: rgba(255,255,255,0.98);
-    -input-border: rgba(0,0,0,0.25);
-    -inset-shadow: rgba(0,0,0,0.28);
-    -btn-bg: rgba(255,255,255,0.72);
-    -btn-hover: rgba(255,255,255,0.96);
-    -btn-shadow: rgba(0,0,0,0.40);
+    -input-bg: rgba(255,255,255,0.82);
+    -input-focus: #ffffff;
+    -input-border: rgba(70,90,150,0.30);
+    -inset-shadow: rgba(20,30,70,0.22);
+    -btn-bg: rgba(255,255,255,0.76);
+    -btn-hover: rgba(255,255,255,0.97);
+    -btn-shadow: rgba(0,10,40,0.40);
     /* table */
-    -table-bg: rgba(255,255,255,0.84);
-    -th-bg: rgba(0,0,0,0.08);
-    -row-alt: rgba(0,0,0,0.05);
-    -row-hover: rgba(0,0,0,0.12);
-    -row-selected: #111111;
-    -divider: rgba(0,0,0,0.16);
+    -table-bg: rgba(250,252,255,0.90);
+    -th-bg: rgba(19,181,142,0.12);
+    -row-alt: rgba(80,100,170,0.05);
+    -row-hover: rgba(19,181,142,0.14);
+    -row-selected: #5b3fc4;
+    -divider: rgba(60,80,140,0.14);
     /* pop-ups */
-    -popup-bg: #f4f4f4;
-    -popup-hover: #dcdcdc;
-    /* feedback: shown with weight and contrast instead of colour */
-    -info-bg: rgba(255,255,255,0.84);
-    -err-bg: rgba(205,205,205,0.92);
-    -err-text: #000000;
-    -ok-bg: rgba(255,255,255,0.88);
-    -ok-text: #000000;
-    -danger: #000000;
-    -danger-bg: rgba(0,0,0,0.10);
+    -popup-bg: #f5f8fd;
+    -popup-hover: #e2ebf8;
+    /* feedback */
+    -info-bg: rgba(255,255,255,0.88);
+    -err-bg: #fde8ee;
+    -err-text: #b0204a;
+    -ok-bg: #e3f8f0;
+    -ok-text: #0b7a5c;
+    -danger: #b0204a;
+    -danger-bg: rgba(176,32,74,0.10);
 
     -fx-font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
     -fx-font-size: 14px;
@@ -73,68 +76,71 @@
 }
 
 .root.dark {
-    -bg-1: #000000;
-    -bg-2: #050505;
-    -bg-3: #0b0b0b;
-    /* solid black panels: no see-through glass, sheen or glow in dark mode */
-    -glass-hi: #0d0d0d;
-    -glass-lo: #070707;
-    -glass-border: rgba(212,175,95,0.70);
-    -spec: transparent;
-    -caustic: transparent;
-    -gloss: transparent;
-    -gloss-soft: transparent;
-    -streak: transparent;
-    -edge: rgba(212,175,95,0.65);
+    -bg-1: #050a18;
+    -bg-2: #08122a;
+    -bg-3: #0d0a24;
+    /* smoked glass: dark and see-through, with only a faint sheen */
+    -glass-hi: rgba(12,22,44,0.84);
+    -glass-lo: rgba(6,12,28,0.72);
+    -glass-border: rgba(61,255,192,0.35);
+    -spec: rgba(120,255,210,0.07);
+    -caustic: rgba(160,110,255,0.14);
+    -gloss: rgba(255,255,255,0.07);
+    -gloss-soft: rgba(255,255,255,0.02);
+    -streak: rgba(255,255,255,0.03);
+    -edge: rgba(61,255,192,0.60);
+    -edge-2: rgba(160,110,255,0.60);
     -rim: rgba(0,0,0,0.30);
-    -shadow: rgba(0,0,0,0.55);
-    -header-hi: #101010;
-    -header-lo: #060606;
-    -bar-bg: #050505;
-    -toolbar-bg: #0a0a0a;
-    /* gold words */
-    -text: #e8c56c;
-    -text-muted: #b8975a;
-    -title: #f6d98a;
-    -accent: #d4af5f;
-    -primary-top: #e0c070;
-    -primary-bottom: #b8923f;
-    -primary-hover-top: #ecd085;
-    -primary-hover-bottom: #c9a24c;
-    -primary-text: #1a1408;
-    -sel-text: #1a1408;
-    -input-bg: #050505;
-    -input-focus: #141107;
-    -input-border: rgba(212,175,95,0.50);
-    -inset-shadow: rgba(0,0,0,0.80);
-    -btn-bg: #161616;
-    -btn-hover: #2a2410;
-    -btn-shadow: rgba(0,0,0,0.50);
-    -table-bg: #080808;
-    -th-bg: #1c1708;
-    -row-alt: #0f0f0f;
-    -row-hover: #221c0a;
-    -row-selected: #d4af5f;
-    -divider: rgba(212,175,95,0.25);
-    -popup-bg: #0d0d0d;
-    -popup-hover: #2a2310;
-    -info-bg: #121212;
-    -err-bg: #2e2508;
-    -err-text: #ffd36e;
-    -ok-bg: #121212;
-    -ok-text: #e8c56c;
-    -danger: #ffd36e;
-    -danger-bg: #2e2508;
+    -shadow: rgba(0,0,0,0.65);
+    -header-hi: rgba(8,16,34,0.93);
+    -header-lo: rgba(6,12,26,0.86);
+    -bar-bg: rgba(4,9,20,0.95);
+    -toolbar-bg: rgba(6,12,26,0.88);
+    /* mint words */
+    -text: #dff7ef;
+    -text-muted: #8fb3c4;
+    -title: #f2fffa;
+    -title-a: #7dffd0;
+    -title-b: #c4a6ff;
+    -accent: #3dffc0;
+    -primary-top: #12b886;
+    -primary-bottom: #6a3fe0;
+    -primary-hover-top: #1fd09a;
+    -primary-hover-bottom: #8057f5;
+    -primary-text: #ffffff;
+    -sel-text: #04121c;
+    -input-bg: rgba(4,10,24,0.78);
+    -input-focus: rgba(10,24,44,0.94);
+    -input-border: rgba(143,179,196,0.35);
+    -inset-shadow: rgba(0,0,0,0.60);
+    -btn-bg: rgba(16,28,52,0.82);
+    -btn-hover: rgba(26,48,78,0.94);
+    -btn-shadow: rgba(0,0,0,0.55);
+    -table-bg: rgba(6,12,28,0.82);
+    -th-bg: rgba(61,255,192,0.10);
+    -row-alt: rgba(255,255,255,0.03);
+    -row-hover: rgba(61,255,192,0.10);
+    -row-selected: #3dffc0;
+    -divider: rgba(143,179,196,0.16);
+    -popup-bg: #0b1426;
+    -popup-hover: #16253f;
+    -info-bg: rgba(10,20,40,0.88);
+    -err-bg: rgba(90,16,44,0.88);
+    -err-text: #ff8fb1;
+    -ok-bg: rgba(8,60,48,0.88);
+    -ok-text: #7dffd0;
+    -danger: #ff8fb1;
+    -danger-bg: rgba(255,79,140,0.14);
 }
 
 /* ---------- Text ---------- */
 .label { -fx-text-fill: -text; }
 .header { -fx-background-color: linear-gradient(to bottom, -header-hi, -header-lo);
-          -fx-border-color: transparent transparent -edge transparent;
+          -fx-border-color: transparent transparent linear-gradient(to right, -edge-2, -accent 50%, -edge-2) transparent;
           -fx-border-width: 0 0 1.5 0;
           -fx-padding: 14 28 14 28;
           -fx-effect: dropshadow(gaussian, -shadow, 20, 0, 0, 6); }
-.app-title { -fx-font-family: "Georgia", "Palatino Linotype", serif; -fx-font-size: 26px; -fx-text-fill: -title; }
+.app-title { -fx-font-family: "Georgia", "Palatino Linotype", serif; -fx-font-size: 26px; -fx-text-fill: linear-gradient(to right, -title-a, -title-b); }
 .card-title { -fx-font-family: "Georgia", "Palatino Linotype", serif; -fx-font-size: 18px; -fx-text-fill: -title; }
 .price-amount { -fx-font-weight: bold; -fx-text-fill: -title; }
 .hint { -fx-text-fill: -text-muted; -fx-font-size: 13px; }
@@ -155,13 +161,13 @@
 }
 .toggle-night {
     -fx-background-color:
-        linear-gradient(to bottom, rgba(0,0,0,0.92), rgba(40,32,10,0.80)),
-        linear-gradient(to bottom, rgba(240,205,120,0.35), transparent 55%);
+        linear-gradient(to bottom, rgba(6,12,30,0.95), rgba(40,22,90,0.85)),
+        linear-gradient(to bottom, rgba(125,255,208,0.30), transparent 55%);
 }
 .theme-toggle:focused .toggle-track { -fx-border-color: -accent; -fx-border-width: 2; }
 .toggle-decoration { -fx-font-size: 13px; -fx-letter-spacing: 1; }
 .toggle-day .toggle-decoration { -fx-text-fill: rgba(0,0,0,0.55); }
-.toggle-night .toggle-decoration { -fx-text-fill: rgba(240,205,120,0.95); }
+.toggle-night .toggle-decoration { -fx-text-fill: rgba(125,255,208,0.95); }
 .toggle-thumb {
     -fx-background-color:
         linear-gradient(to bottom, rgba(255,255,255,0.98), rgba(235,235,235,0.70)),
@@ -174,7 +180,7 @@
 }
 .toggle-icon { -fx-font-family: "Segoe UI Symbol", "Segoe UI Emoji", sans-serif; -fx-font-size: 18px; }
 .toggle-thumb .toggle-sun { -fx-text-fill: #000000; }
-.toggle-thumb .toggle-moon { -fx-text-fill: #8a6a1c; }
+.toggle-thumb .toggle-moon { -fx-text-fill: #5b3fc4; }
 
 /* ---------- Cards: water glass (body, top sheen, pooled bottom-corner glow, rim light) ---------- */
 .card {
@@ -187,22 +193,11 @@
         linear-gradient(from 0% 0% to 100% 100%, transparent 28%, -streak 36%, transparent 44%);
     -fx-background-insets: 0, 2, 2, 2, 2, 2;
     -fx-background-radius: 30, 28, 28, 28, 28, 28;
-    -fx-border-color: linear-gradient(from 0% 0% to 100% 100%, -edge 0%, transparent 38%, transparent 62%, -edge 100%);
+    -fx-border-color: linear-gradient(from 0% 0% to 100% 100%, -edge 0%, transparent 38%, transparent 62%, -edge-2 100%);
     -fx-border-width: 1.8;
     -fx-border-radius: 30;
     -fx-padding: 24;
     -fx-effect: dropshadow(gaussian, -shadow, 44, 0.06, 0, 18);
-}
-
-/* Dark mode: a plain solid black card with a thin gold edge (no water-glass layers) */
-.root.dark .card {
-    -fx-background-color: -glass-hi;
-    -fx-background-insets: 0;
-    -fx-background-radius: 26;
-    -fx-border-color: -glass-border;
-    -fx-border-width: 1.2;
-    -fx-border-radius: 26;
-    -fx-effect: dropshadow(gaussian, -shadow, 30, 0.05, 0, 10);
 }
 
 /* ---------- Inputs ---------- */
@@ -226,6 +221,7 @@
     -fx-background-color: -input-focus;
     -fx-border-color: -accent;
     -fx-border-width: 1.5;
+    -fx-effect: dropshadow(gaussian, -accent, 10, 0.15, 0, 0);
 }
 /* The input an error message is about (set by BillFormView); after :focused so it wins */
 .text-field:error, .combo-box-base:error, .text-area:error {
@@ -269,16 +265,17 @@
 .button:focused { -fx-border-color: -accent; -fx-border-width: 2; }
 .button:default {
     -fx-background-color:
-        linear-gradient(to bottom, -primary-top, -primary-bottom),
+        linear-gradient(to right, -primary-top, -primary-bottom),
         linear-gradient(to bottom, rgba(255,255,255,0.35) 0%, transparent 55%);
-    -fx-border-color: linear-gradient(to bottom, -edge, -input-border);
+    -fx-border-color: linear-gradient(to right, -edge, -edge-2);
+    -fx-effect: dropshadow(gaussian, -edge-2, 18, 0.10, 0, 4);
     -fx-text-fill: -primary-text;
     -fx-font-weight: bold;
     -fx-min-width: 150px;
 }
 .button:default:hover {
     -fx-background-color:
-        linear-gradient(to bottom, -primary-hover-top, -primary-hover-bottom),
+        linear-gradient(to right, -primary-hover-top, -primary-hover-bottom),
         linear-gradient(to bottom, rgba(255,255,255,0.35) 0%, transparent 55%);
 }
 .button.danger { -fx-text-fill: -danger; }
@@ -334,7 +331,7 @@
 .table-view .column-header-background { -fx-background-color: -th-bg; -fx-background-radius: 20 20 0 0; }
 .table-view .column-header, .table-view .filler {
     -fx-background-color: transparent;
-    -fx-border-color: transparent -divider -accent transparent;
+    -fx-border-color: transparent -divider -edge-2 transparent;
     -fx-border-width: 0 1 1 0;
     -fx-size: 40;
 }
