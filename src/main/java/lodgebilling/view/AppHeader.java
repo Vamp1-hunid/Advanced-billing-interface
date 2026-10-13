@@ -3,7 +3,7 @@ package lodgebilling.view;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
-
+// Lab 3  - Group 1
 /** The title bar at the top of the window, kept to one line to leave room for the bills. */
 public class AppHeader extends HBox {
 
