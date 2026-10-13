@@ -8,6 +8,7 @@ import javafx.scene.layout.HBox;
 public class AppHeader extends HBox {
 
     public AppHeader() {
+         //sets up the app tittle label and header styling 
         super(14);
         Label title = new Label("Lodge Billing");
         title.getStyleClass().add("app-title");
