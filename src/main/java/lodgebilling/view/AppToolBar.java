@@ -8,6 +8,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import lodgebilling.controller.BillingActions;
 import lodgebilling.model.BillingModel;
+// Lab 3 - Group 1
 
 /** Quick-access buttons under the menu, with the light/dark switch on the right. */
 public class AppToolBar extends ToolBar {
