@@ -4,6 +4,7 @@ import lodgebilling.security.Permission;
 
 /** The screens in the sidebar, in order, with who may see each one. */
 public enum AppPage {
+    STAYS("Stays", Permission.MANAGE_RESERVATIONS),
     QUICK_BILLS("Receipts", Permission.CREATE_BILL),
     ROOMS("Rooms", Permission.UPDATE_ROOM_STATUS);
 

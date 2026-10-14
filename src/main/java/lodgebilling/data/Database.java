@@ -74,7 +74,28 @@ public final class Database implements AutoCloseable {
             room_type  TEXT    NOT NULL CHECK (room_type IN ('STANDARD', 'DELUXE', 'FAMILY')),
             status     TEXT    NOT NULL DEFAULT 'AVAILABLE'
                        CHECK (status IN ('AVAILABLE', 'OCCUPIED', 'DIRTY', 'MAINTENANCE'))
-        )"""
+        )""",
+        // check_out is the morning the guest leaves, so nights = check_out - check_in
+        """
+        CREATE TABLE IF NOT EXISTS reservations (
+            id                 INTEGER PRIMARY KEY AUTOINCREMENT,
+            guest_name         TEXT    NOT NULL,
+            guest_phone        TEXT    NOT NULL DEFAULT '',
+            company            TEXT    NOT NULL DEFAULT '',
+            company_pays_room  INTEGER NOT NULL DEFAULT 0,
+            room_id            INTEGER NOT NULL REFERENCES rooms(id),
+            check_in           TEXT    NOT NULL,
+            check_out          TEXT    NOT NULL,
+            status             TEXT    NOT NULL DEFAULT 'BOOKED'
+                               CHECK (status IN ('BOOKED', 'CHECKED_IN', 'CHECKED_OUT', 'CANCELLED')),
+            nightly_rate       TEXT    NOT NULL,
+            vat_percent        TEXT    NOT NULL,
+            notes              TEXT    NOT NULL DEFAULT '',
+            created_by         TEXT    NOT NULL,
+            created_at         TEXT    NOT NULL,
+            CHECK (check_out > check_in)
+        )""",
+        "CREATE INDEX IF NOT EXISTS idx_res_room_dates ON reservations(room_id, check_in, check_out)"
     };
 
     private final Connection connection;

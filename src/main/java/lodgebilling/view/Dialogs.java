@@ -151,8 +151,9 @@ public class Dialogs {
         Alert about = new Alert(Alert.AlertType.INFORMATION);
         about.setTitle("About");
         about.setHeaderText("Lodge Billing");
-        about.setContentText("Lodge Billing: walk-in receipts and room housekeeping.\n\n"
-                + "Housekeeping: room status only. Front desk: receipts and room status. "
+        about.setContentText("Lodge Billing: bookings and walk-ins, check-in and check-out, room housekeeping "
+                + "and walk-in receipts.\n\n"
+                + "Housekeeping: room status only. Front desk: bookings, receipts and room status. "
                 + "Admin: also deletes receipts, adds rooms, manages users and reads the audit log.\n\n"
                 + "Signed in as " + model.session().user().fullName()
                 + " (" + model.session().user().role().getLabel() + ").");

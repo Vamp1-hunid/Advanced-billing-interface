@@ -4,6 +4,7 @@ import javafx.stage.Stage;
 import lodgebilling.data.AuditLog;
 import lodgebilling.data.DataException;
 import lodgebilling.model.BillingModel;
+import lodgebilling.model.Reservation;
 import lodgebilling.model.StatusMessage;
 import lodgebilling.model.Theme;
 import lodgebilling.security.AccessDeniedException;
@@ -73,5 +74,15 @@ public class PageContext {
             error("Database problem: " + e.getMessage());
         }
         return false;
+    }
+
+    /** Checks the guest out and reports it; the room turns Dirty until it is cleaned. */
+    public void checkOut(Reservation stay) {
+        String room = stay.room().number();
+        if (attempt(() -> lodge.checkOut(session(), stay.id()))) {
+            success(stay.guestName() + " checked out of room " + room + ". Room " + room
+                    + " is now Dirty until housekeeping cleans it.");
+        }
+        refreshCurrentPage();
     }
 }

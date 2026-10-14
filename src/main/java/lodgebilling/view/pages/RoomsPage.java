@@ -14,6 +14,8 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import lodgebilling.model.Money;
+import lodgebilling.model.Reservation;
+import lodgebilling.model.ReservationStatus;
 import lodgebilling.model.Room;
 import lodgebilling.model.RoomStatus;
 import lodgebilling.model.RoomType;
@@ -69,13 +71,19 @@ public class RoomsPage implements Page {
         Long selectedId = group.getSelectedToggle() == null ? null : (Long) group.getSelectedToggle().getUserData();
         ctx.attempt(() -> {
             List<Room> rooms = ctx.lodge().rooms();
+            Map<Long, Reservation> inHouse = new java.util.HashMap<>();
+            if (ctx.can(Permission.MANAGE_RESERVATIONS)) {   // guest names are not for housekeeping screens
+                for (Reservation r : ctx.lodge().reservationsBetween(ctx.lodge().today(), ctx.lodge().today().plusDays(1))) {
+                    if (r.status() == ReservationStatus.CHECKED_IN) inHouse.put(r.room().id(), r);
+                }
+            }
             Map<RoomStatus, Integer> byStatus = new EnumMap<>(RoomStatus.class);
             for (RoomStatus s : RoomStatus.values()) byStatus.put(s, 0);
             tiles.getChildren().clear();
             group.getToggles().clear();
             for (Room room : rooms) {
                 byStatus.merge(room.status(), 1, Integer::sum);
-                tiles.getChildren().add(tile(room, selectedId));
+                tiles.getChildren().add(tile(room, inHouse.get(room.id()), selectedId));
             }
             counts.getChildren().clear();
             for (RoomStatus s : RoomStatus.values()) {
@@ -84,13 +92,19 @@ public class RoomsPage implements Page {
         });
     }
 
-    private Node tile(Room room, Long selectedId) {
+    private Node tile(Room room, Reservation guest, Long selectedId) {
         Label number = new Label(room.number());
         number.getStyleClass().add("tile-number");
         Label type = new Label(room.type() + "  " + Money.format(ctx.lodge().rateCard().rateFor(room.type())));
         type.getStyleClass().add("tile-type");
         Label status = Ui.chip(room.status().toString(), room.status().styleClass());
         VBox box = new VBox(4, number, type, status);
+        if (guest != null) {
+            Label g = new Label(guest.guestName() + ", until " + guest.checkOut().format(Ui.DAY));
+            g.getStyleClass().add("hint");
+            g.setWrapText(true);
+            box.getChildren().add(g);
+        }
         box.setAlignment(Pos.TOP_LEFT);
         ToggleButton t = new ToggleButton();
         t.setGraphic(box);

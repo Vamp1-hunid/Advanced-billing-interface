@@ -10,6 +10,9 @@ public enum Permission {
     PRINT_RECEIPT,
     DELETE_BILL,
 
+    // Front desk
+    MANAGE_RESERVATIONS,   // book, edit, cancel, check in, check out
+
     // Rooms
     UPDATE_ROOM_STATUS,    // clean / dirty / maintenance
     MANAGE_ROOMS,          // add rooms, change rates and VAT

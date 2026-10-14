@@ -162,7 +162,7 @@ public class UserManagementDialog {
                 "Change role", "Cancel");
         ComboBox<Role> role = form.add("Role", new ComboBox<>(FXCollections.observableArrayList(Role.values())));
         role.setValue(user.role());
-        form.addNote("Housekeeping: room status only. Front desk: receipts and room status. "
+        form.addNote("Housekeeping: room status only. Front desk: bookings, receipts and room status. "
                 + "Admin: everything.");
         form.onSubmit(() -> {
             auth.setRole(session, user.id(), role.getValue());

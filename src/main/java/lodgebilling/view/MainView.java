@@ -5,6 +5,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.ToggleButton;
@@ -26,7 +27,9 @@ import lodgebilling.service.AuthService;
 import lodgebilling.service.LodgeService;
 import lodgebilling.view.pages.Page;
 import lodgebilling.view.pages.PageContext;
+import lodgebilling.view.pages.ReservationDialog;
 import lodgebilling.view.pages.RoomsPage;
+import lodgebilling.view.pages.StaysPage;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -110,6 +113,7 @@ public class MainView extends BorderPane {
 
     private Page createPage(AppPage p) {
         return switch (p) {
+            case STAYS -> new StaysPage(pageContext);
             case ROOMS -> new RoomsPage(pageContext);
             case QUICK_BILLS -> new Page() {
                 private final VBox node = new VBox(toolBar, billingScroll);
@@ -123,6 +127,16 @@ public class MainView extends BorderPane {
     private VBox buildSidebar(List<AppPage> visible) {
         VBox side = new VBox(6);
         side.getStyleClass().add("sidebar");
+        if (pageContext.can(Permission.MANAGE_RESERVATIONS)) {
+            // Quick actions, reachable from every page
+            Button book = Ui.button("+ New booking", () -> quickBook(ReservationDialog.Mode.BOOK));
+            Button walkIn = Ui.button("Walk-in", () -> quickBook(ReservationDialog.Mode.WALK_IN));
+            book.getStyleClass().add("quick-action");
+            walkIn.getStyleClass().add("quick-action");
+            book.setMaxWidth(Double.MAX_VALUE);
+            walkIn.setMaxWidth(Double.MAX_VALUE);
+            side.getChildren().addAll(book, walkIn);
+        }
         side.getChildren().add(sideLabel(visible.size() > 1 ? "Go to   (Ctrl+1 to " + visible.size() + ")" : "Go to"));
         for (int i = 0; i < visible.size(); i++) {
             AppPage p = visible.get(i);
@@ -142,6 +156,13 @@ public class MainView extends BorderPane {
         Label l = new Label(text);
         l.getStyleClass().add("side-label");
         return l;
+    }
+
+    private void quickBook(ReservationDialog.Mode mode) {
+        ReservationDialog.show(pageContext, mode, null, null, null).ifPresent(r -> pageContext.success(
+                (mode == ReservationDialog.Mode.WALK_IN ? r.guestName() + " checked in to room "
+                        : "Booked " + r.reference() + ": " + r.guestName() + ", room ") + r.room().number() + "."));
+        refreshCurrent();
     }
 
     /** Switches to a page and re-reads its data. Ignored for pages this role cannot see. */
