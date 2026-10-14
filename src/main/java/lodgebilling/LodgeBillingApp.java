@@ -15,6 +15,7 @@ import lodgebilling.model.BillingModel;
 import lodgebilling.data.BillRepository;
 import lodgebilling.data.DataException;
 import lodgebilling.data.Database;
+import lodgebilling.data.LegacyReceiptImporter;
 import lodgebilling.view.LoginView;
 
 import java.util.logging.Level;
@@ -50,6 +51,8 @@ public class LodgeBillingApp extends Application {
             alert.showAndWait();
             return;
         }
+        // Receipts saved by the earlier version (receipts.tsv) are copied in once
+        LegacyReceiptImporter.importOnce(database, LegacyReceiptImporter.defaultFile());
         model = new BillingModel(new BillRepository(database), auth::currentUser);
 
         stage.setMinWidth(MIN_WIDTH);
