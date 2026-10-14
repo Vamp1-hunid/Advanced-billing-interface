@@ -30,6 +30,7 @@ import lodgebilling.view.pages.PageContext;
 import lodgebilling.view.pages.ReservationDialog;
 import lodgebilling.view.pages.RoomsPage;
 import lodgebilling.view.pages.StaysPage;
+import lodgebilling.view.pages.TapeChartPage;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -113,6 +114,7 @@ public class MainView extends BorderPane {
 
     private Page createPage(AppPage p) {
         return switch (p) {
+            case TAPE_CHART -> new TapeChartPage(pageContext);
             case STAYS -> new StaysPage(pageContext);
             case ROOMS -> new RoomsPage(pageContext);
             case QUICK_BILLS -> new Page() {
