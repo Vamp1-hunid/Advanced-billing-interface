@@ -55,6 +55,14 @@ public class BillTableView extends TableView<Bill> {
 
         setItems(bills);
         setPlaceholder(new Label("No receipts saved yet."));
+        setFixedCellSize(44);
+        setEditable(False);
+        getStyleClass().add("bill-table");
+        setStyle("-fx-background-color: white;"+
+                "-fx-border-color:#E2E8f0;"+
+                "-fx-border-radius: 8;"+
+                "-fx-background-radius: 8;"
+               );
         // Columns share the full width in proportion to their preferred widths,
         // so the table fills its card with no empty strip and no scrollbar
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
@@ -75,7 +83,7 @@ public class BillTableView extends TableView<Bill> {
             }
         });
 
-        // Enter on the selected row opens its receipt; Space asks to delete it
+        // Enter open the selected receipt; Delete requests deletion
         setOnKeyPressed(e -> {
             if (selectedBill() == null) {
                 return;
@@ -86,7 +94,11 @@ public class BillTableView extends TableView<Bill> {
             } else if (e.getCode() == KeyCode.SPACE) {
                 onDelete.run();
                 e.consume();
+            }else if (e.getCode() == KeyCode.DELETE) {
+                onDelete.run();
+                e.consume();
             }
+            )
         });
     }
 
