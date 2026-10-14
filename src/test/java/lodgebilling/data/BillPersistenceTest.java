@@ -9,18 +9,22 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.time.Clock;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class BillPersistenceTest {
 
     private Database db;
     private BillRepository repo;
+    private AuditLog audit;
 
     @BeforeEach
     void setUp() {
         db = Database.inMemory();
         repo = new BillRepository(db);
+        audit = new AuditLog(db, Clock.systemUTC());
     }
 
     @AfterEach
@@ -33,7 +37,7 @@ class BillPersistenceTest {
     }
 
     private BillingModel model() {
-        return new BillingModel(repo, () -> "mary");
+        return new BillingModel(repo, audit, () -> "mary");
     }
 
     @Test
@@ -59,6 +63,8 @@ class BillPersistenceTest {
 
         Bill third = model.save(input("Guest Three"));
         assertEquals("R003", third.getReceiptNumber());   // R002 is gone for good, not handed out again
+        assertTrue(audit.latest(10).stream().anyMatch(e -> e.action() == AuditLog.Action.BILL_DELETED
+                && e.username().equals("mary") && e.details().startsWith("R002")));
     }
 
     @Test

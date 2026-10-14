@@ -12,12 +12,14 @@ import javafx.util.Duration;
 import lodgebilling.controller.BillingController;
 import lodgebilling.model.AuthService;
 import lodgebilling.model.BillingModel;
+import lodgebilling.data.AuditLog;
 import lodgebilling.data.BillRepository;
 import lodgebilling.data.DataException;
 import lodgebilling.data.Database;
 import lodgebilling.data.LegacyReceiptImporter;
 import lodgebilling.view.LoginView;
 
+import java.time.Clock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -52,8 +54,9 @@ public class LodgeBillingApp extends Application {
             return;
         }
         // Receipts saved by the earlier version (receipts.tsv) are copied in once
-        LegacyReceiptImporter.importOnce(database, LegacyReceiptImporter.defaultFile());
-        model = new BillingModel(new BillRepository(database), auth::currentUser);
+        AuditLog audit = new AuditLog(database, Clock.systemUTC());
+        LegacyReceiptImporter.importOnce(database, audit, LegacyReceiptImporter.defaultFile());
+        model = new BillingModel(new BillRepository(database), audit, auth::currentUser);
 
         stage.setMinWidth(MIN_WIDTH);
         stage.setMinHeight(MIN_HEIGHT);

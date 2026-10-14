@@ -4,6 +4,8 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import lodgebilling.data.AuditLog;
+import lodgebilling.data.AuditLog.Action;
 import lodgebilling.data.BillRepository;
 
 import java.time.LocalDateTime;
@@ -14,7 +16,8 @@ import java.util.function.Supplier;
  * Views observe it (the receipts list, the status message, the theme) and the
  * controller changes it in response to what the user does.
  *
- * Receipts are written through to the database, so they survive closing the app.
+ * Receipts are written through to the database, so they survive closing the app,
+ * and every save and delete is recorded in the audit log.
  */
 public class BillingModel {
 
@@ -22,6 +25,7 @@ public class BillingModel {
             StatusMessage.info("Enter the guest's details, then calculate or save the receipt.");
 
     private final BillRepository repository;
+    private final AuditLog audit;
     private final Supplier<String> currentUser;
 
     private final ObservableList<Bill> bills = FXCollections.observableArrayList();
@@ -34,8 +38,9 @@ public class BillingModel {
     private String lastSavedReceiptNumber;
 
     /** @param currentUser who is signed in, stored on each receipt as "By" */
-    public BillingModel(BillRepository repository, Supplier<String> currentUser) {
+    public BillingModel(BillRepository repository, AuditLog audit, Supplier<String> currentUser) {
         this.repository = repository;
+        this.audit = audit;
         this.currentUser = currentUser;
         bills.setAll(repository.findAll());
     }
@@ -75,12 +80,16 @@ public class BillingModel {
         bills.add(bill);
         lastSavedInput = input;
         lastSavedReceiptNumber = bill.getReceiptNumber();
+        audit.record(currentUser.get(), Action.BILL_SAVED,
+                bill.getReceiptNumber() + " for " + bill.getGuestName() + ", total " + Money.format(bill.getTotal()));
         return bill;
     }
 
     public void delete(Bill bill) {
         repository.delete(bill.getReceiptNumber());
         bills.remove(bill);
+        audit.record(currentUser.get(), Action.BILL_DELETED,
+                bill.getReceiptNumber() + " for " + bill.getGuestName() + ", total " + Money.format(bill.getTotal()));
         // If the receipt still in the form was deleted, allow it to be saved again
         if (bill.getReceiptNumber().equals(lastSavedReceiptNumber)) {
             forgetLastSaved();

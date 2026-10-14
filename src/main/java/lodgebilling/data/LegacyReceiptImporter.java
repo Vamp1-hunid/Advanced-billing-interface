@@ -1,5 +1,6 @@
 package lodgebilling.data;
 
+import lodgebilling.data.AuditLog.Action;
 import lodgebilling.model.RoomType;
 
 import java.io.IOException;
@@ -45,7 +46,7 @@ public final class LegacyReceiptImporter {
      * Imports the file if it is there; does nothing otherwise. Never stops the app
      * from starting: on any problem the file is left in place and the error is logged.
      */
-    public static Result importOnce(Database database, Path file) {
+    public static Result importOnce(Database database, AuditLog audit, Path file) {
         if (!Files.isRegularFile(file)) {
             return new Result(0, 0, 0);
         }
@@ -55,6 +56,9 @@ public final class LegacyReceiptImporter {
             Result result = database.inTransaction(() -> copy(database.connection(), lines));
             Files.move(file, file.resolveSibling(file.getFileName() + ".imported"),
                     StandardCopyOption.REPLACE_EXISTING);
+            audit.record("system", Action.RECEIPTS_IMPORTED, result.imported() + " receipts from " + file.getFileName()
+                    + (result.skippedDamaged() > 0 ? ", " + result.skippedDamaged() + " damaged lines skipped" : "")
+                    + (result.renumbered() > 0 ? ", " + result.renumbered() + " given new numbers" : ""));
             LOG.info(() -> "Imported old receipts: " + result);
             return result;
         } catch (IOException | DataException e) {

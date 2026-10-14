@@ -32,7 +32,16 @@ public final class Database implements AutoCloseable {
             notes       TEXT    NOT NULL DEFAULT '',
             issued_at   TEXT    NOT NULL,
             created_by  TEXT    NOT NULL
-        )"""
+        )""",
+        """
+        CREATE TABLE IF NOT EXISTS audit_log (
+            id        INTEGER PRIMARY KEY AUTOINCREMENT,
+            at        TEXT NOT NULL,
+            username  TEXT NOT NULL,
+            action    TEXT NOT NULL,
+            details   TEXT NOT NULL DEFAULT ''
+        )""",
+        "CREATE INDEX IF NOT EXISTS idx_audit_at ON audit_log(at)"
     };
 
     private final Connection connection;

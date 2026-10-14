@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -32,7 +33,9 @@ class LegacyReceiptImporterTest {
     void copiesReceiptsKeepingTheirNumbersAndRenamesTheFile() throws Exception {
         Path file = write(GOOD_1, GOOD_2, DAMAGED, "");
         try (Database db = Database.inMemory()) {
-            LegacyReceiptImporter.Result result = LegacyReceiptImporter.importOnce(db, file);
+            AuditLog audit = new AuditLog(db, Clock.systemUTC());
+
+            LegacyReceiptImporter.Result result = LegacyReceiptImporter.importOnce(db, audit, file);
 
             assertEquals(new LegacyReceiptImporter.Result(2, 1, 0), result);
             List<Bill> bills = new BillRepository(db).findAll();
@@ -50,7 +53,7 @@ class LegacyReceiptImporterTest {
     void newReceiptsCarryOnAfterTheHighestImportedNumber() throws Exception {
         Path file = write(GOOD_1, GOOD_2);
         try (Database db = Database.inMemory()) {
-            LegacyReceiptImporter.importOnce(db, file);
+            LegacyReceiptImporter.importOnce(db, new AuditLog(db, Clock.systemUTC()), file);
 
             Bill next = new BillRepository(db).insert(input("New Guest"), LocalDateTime.now(), "sammy");
 
@@ -65,7 +68,7 @@ class LegacyReceiptImporterTest {
             new BillRepository(db).insert(input("Already Here"), LocalDateTime.now(), "sammy");   // takes R001
 
             LegacyReceiptImporter.Result result =
-                    LegacyReceiptImporter.importOnce(db, file);
+                    LegacyReceiptImporter.importOnce(db, new AuditLog(db, Clock.systemUTC()), file);
 
             assertEquals(1, result.renumbered());
             Bill imported = new BillRepository(db).findAll().get(1);
@@ -77,7 +80,8 @@ class LegacyReceiptImporterTest {
     @Test
     void noFileMeansNothingToDo() {
         try (Database db = Database.inMemory()) {
-            LegacyReceiptImporter.Result result = LegacyReceiptImporter.importOnce(db, dir.resolve("receipts.tsv"));
+            LegacyReceiptImporter.Result result = LegacyReceiptImporter.importOnce(
+                    db, new AuditLog(db, Clock.systemUTC()), dir.resolve("receipts.tsv"));
             assertEquals(0, result.imported());
         }
     }
