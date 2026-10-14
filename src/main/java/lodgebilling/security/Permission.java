@@ -22,6 +22,7 @@ public enum Permission {
     MANAGE_ROOMS,          // add rooms, change rates and VAT
 
     // Admin
+    VIEW_REPORTS,
     MANAGE_USERS,
     VIEW_AUDIT_LOG
 }

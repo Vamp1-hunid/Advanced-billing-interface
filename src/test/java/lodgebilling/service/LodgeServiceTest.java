@@ -2,6 +2,7 @@ package lodgebilling.service;
 
 import lodgebilling.data.AuditLog;
 import lodgebilling.data.Database;
+import lodgebilling.data.ReportRepository.DailyStat;
 import lodgebilling.model.ChargeCategory;
 import lodgebilling.model.FolioEntry;
 import lodgebilling.model.FolioSummary;
@@ -104,6 +105,7 @@ class LodgeServiceTest {
         assertThrows(AccessDeniedException.class,
                 () -> lodge.recordPayment(CLEANER, 1, PaymentMethod.CASH, k("10"), Payer.GUEST, ""));
         assertThrows(AccessDeniedException.class, () -> lodge.dashboard(CLEANER));
+        assertThrows(AccessDeniedException.class, () -> lodge.outstanding(CLEANER));
     }
 
     @Test
@@ -194,7 +196,7 @@ class LodgeServiceTest {
         assertThrows(AccessDeniedException.class, () -> lodge.checkOut(DESK, r.id(), true));
         LodgeService.Folio gone = lodge.checkOut(ADMIN, r.id(), true);
         assertEquals(ReservationStatus.CHECKED_OUT, gone.stay().status());
-        assertTrue(lodge.folio(r.id()).summary().balance().signum() > 0);   // the debt is still on record
+        assertEquals(1, lodge.outstanding(ADMIN).size());   // the debt is still on record
     }
 
     @Test
@@ -241,6 +243,22 @@ class LodgeServiceTest {
         lodge.cancel(DESK, r.id());
         assertEquals(ReservationStatus.CANCELLED, lodge.reservation(r.id()).status());
         assertTrue(lodge.freeRooms(TODAY.plusDays(5), TODAY.plusDays(6), 0).contains(room("103")));
+    }
+
+    @Test
+    void dailyReportCountsRoomNightsAndPayments() throws LodgeException {
+        Reservation r = lodge.walkIn(DESK, form("John Phiri", "201", TODAY, TODAY.plusDays(2)));
+        lodge.recordPayment(DESK, r.id(), PaymentMethod.CASH, k("500.50"), Payer.GUEST, "");
+        List<DailyStat> days = lodge.dailyReport(ADMIN, TODAY.minusDays(1), TODAY.plusDays(2));
+
+        assertEquals(4, days.size());                       // every day appears, even empty ones
+        assertEquals(0, days.get(0).roomsSold());
+        assertEquals(1, days.get(1).roomsSold());
+        assertEquals(k("550.00"), days.get(1).roomRevenue());
+        assertEquals(k("500.50"), days.get(1).paymentsReceived());
+        assertEquals(k("61.11"), days.get(1).revPar());      // 550 / 9 rooms
+        assertEquals(0, days.get(3).roomsSold());            // left on the morning of day 3
+        assertThrows(AccessDeniedException.class, () -> lodge.dailyReport(DESK, TODAY, TODAY));
     }
 
     @Test

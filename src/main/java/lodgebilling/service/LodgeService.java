@@ -5,6 +5,7 @@ import lodgebilling.data.AuditLog.Action;
 import lodgebilling.data.Database;
 import lodgebilling.data.FolioRepository;
 import lodgebilling.data.ReportRepository;
+import lodgebilling.data.ReportRepository.DailyStat;
 import lodgebilling.data.ReservationRepository;
 import lodgebilling.data.RoomRepository;
 import lodgebilling.data.SettingsRepository;
@@ -459,7 +460,7 @@ public class LodgeService {
     }
 
     // =====================================================================
-    // Dashboard
+    // Dashboard and reports
     // =====================================================================
 
     public DashboardData dashboard(Session session) {
@@ -493,6 +494,40 @@ public class LodgeService {
         for (Room room : all) byStatus.merge(room.status(), 1, Integer::sum);
         BigDecimal paidToday = reports.daily(today, today).get(0).paymentsReceived();
         return new DashboardData(arrivals, departures, inHouse, all.size(), byStatus, outstanding, paidToday);
+    }
+
+    public List<DailyStat> dailyReport(Session session, LocalDate from, LocalDate to) throws LodgeException {
+        session.require(Permission.VIEW_REPORTS);
+        if (from == null || to == null || to.isBefore(from)) {
+            throw new LodgeException("Choose a start date on or before the end date.");
+        }
+        if (from.plusDays(366).isBefore(to)) {
+            throw new LodgeException("Choose a range of at most one year.");
+        }
+        return reports.daily(from, to);
+    }
+
+    /** Stays that still owe money (in house or already gone), largest debt first. */
+    public List<Folio> outstanding(Session session) {
+        session.require(Permission.VIEW_REPORTS);
+        Map<Long, List<FolioEntry>> allEntries = folios.findAllGrouped();
+        List<Folio> owing = new ArrayList<>();
+        for (Reservation r : reservations.findAll()) {
+            if (r.status() == ReservationStatus.CHECKED_IN || r.status() == ReservationStatus.CHECKED_OUT) {
+                List<FolioEntry> entries = allEntries.getOrDefault(r.id(), List.of());
+                FolioSummary s = FolioCalculator.summarise(r, entries);
+                if (s.balance().signum() > 0) {
+                    owing.add(new Folio(r, entries, s));
+                }
+            }
+        }
+        owing.sort((a, b) -> b.summary().balance().compareTo(a.summary().balance()));
+        return owing;
+    }
+
+    public void recordExport(Session session, String what) {
+        session.require(Permission.VIEW_REPORTS);
+        audit.record(session.username(), Action.REPORT_EXPORTED, what);
     }
 
     // =====================================================================

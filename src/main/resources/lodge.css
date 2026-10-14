@@ -582,6 +582,9 @@
 .root.dark .balance-due.settled { -fx-text-fill: #9ff0bf; }
 .table-row-cell.voided .table-cell { -fx-strikethrough: true; -fx-text-fill: -text-muted; -fx-opacity: 0.7; }
 .split-grid { -fx-padding: 10 0 0 0; }
+.chart { -fx-padding: 4; }
+.chart-bar { -fx-bar-fill: linear-gradient(to bottom, -primary-top, -primary-bottom); -fx-background-radius: 6 6 0 0; }
+.chart-title, .axis-label, .axis .tick-mark, .axis { -fx-text-fill: -text; -fx-tick-label-fill: -text; }
 .button.compact { -fx-min-width: 0; -fx-padding: 9 16 9 16; -fx-min-height: 40px; }
 .metric-value { -fx-font-size: 22px; }
 
