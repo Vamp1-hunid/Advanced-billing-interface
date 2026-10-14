@@ -20,6 +20,11 @@ java {
 
 tasks.withType(JavaCompile).configureEach {
     options.release = 21
+    options.encoding = 'UTF-8'   // the source uses ★, − and ’ characters
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
 }
 
 javafx {
@@ -27,6 +32,14 @@ javafx {
     modules = [ 'javafx.controls', 'javafx.fxml' ]
 }
 
+dependencies {
+    implementation 'org.xerial:sqlite-jdbc:3.46.1.3'
+    runtimeOnly 'org.slf4j:slf4j-nop:2.0.16'   // silences sqlite-jdbc's "no SLF4J provider" warning
+    testImplementation platform('org.junit:junit-bom:5.11.4')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
 application {
-    mainClass = 'lodgebilling.LodgeBillingApp'
+    mainClass = 'lodgebilling.LodgeBillingApp'   // gradle run; in IntelliJ run Launcher
 }
