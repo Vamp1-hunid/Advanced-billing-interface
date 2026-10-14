@@ -3,7 +3,8 @@
 **GROUP-1-LAB-3**
 
 A desktop application (JavaFX) that runs a small lodge's front desk: bookings and walk-ins, a tape chart of
-rooms against dates, guest folios with charges, payments and VAT, room housekeeping, and quick walk-in receipts.
+rooms against dates, guest folios with charges, payments and VAT, room housekeeping, quick walk-in receipts,
+a dashboard and reports.
 
 ## Features
 
@@ -18,6 +19,9 @@ rooms against dates, guest folios with charges, payments and VAT, room housekeep
 - **Guest folio:** post bar, restaurant, laundry, transport and other charges; take payments by cash, card,
   mobile money or bank transfer; split the bill between the guest and a company; void a mistake with a reason.
   Check-out is blocked while money is owed (an admin can force it)
+- **Dashboard:** today's arrivals and departures, occupancy, outstanding balances, payments today, recent activity
+- **Reports (admin):** daily room nights sold, occupancy, ADR and RevPAR, payments received, and who still owes
+  money; both export to CSV (safe to open in Excel: values starting with = + - @ are neutralised)
 - **Rates and VAT:** admins can change room prices and the VAT %. Existing bookings keep the price they were made at
 - Walk-in receipts: guest form with validation (name, room type, nights, extras, amount paid, notes)
 - Automatic calculation of room charge, discount, total and balance
@@ -74,7 +78,7 @@ The first time the app opens it asks you to create the **admin account**. Passwo
 | ------------ | ----------------------------------------------------------------------------- |
 | Housekeeping | See rooms and mark them clean, dirty or under maintenance                     |
 | Front desk   | Bookings, check-in/out, folio charges and payments, receipts, room status     |
-| Admin        | Everything, plus voids, forced check-out, rooms, rates, users and audit log  |
+| Admin        | Everything, plus voids, forced check-out, rooms, rates, reports, users, audit log |
 
 ## Where the data is kept
 
@@ -118,7 +122,8 @@ src/main/java/lodgebilling/
 ├── security/                 Roles, permissions, password hashing and rules, the signed-in session
 ├── service/                  AuthService (sign-in, accounts) and LodgeService (front-desk rules)
 ├── view/                     JavaFX screens: setup, login, main window, receipts, dialogs
-│   └── pages/                Tape chart, stays, rooms, folio window, booking dialog
+│   └── pages/                Dashboard, tape chart, stays, rooms, reports, folio window, booking dialog
+├── util/                     CsvWriter for the report exports
 └── controller/               Connects the views to the model
 src/main/resources/           Stylesheet (lodge.css)
 src/test/java/lodgebilling/   JUnit tests
