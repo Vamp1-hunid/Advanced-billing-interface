@@ -13,12 +13,15 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import lodgebilling.controller.BillingActions;
+import lodgebilling.data.AuditLog;
 import lodgebilling.model.Bill;
 import lodgebilling.model.BillFormData;
 import lodgebilling.model.BillingModel;
 import lodgebilling.model.FormField;
 import lodgebilling.model.RateCard;
 import lodgebilling.service.AuthService;
+
+import java.util.List;
 
 /**
  * The V in MVC: the whole window. It lays out the smaller views, shows what the
@@ -133,6 +136,7 @@ public class MainView extends BorderPane {
     public boolean confirmDelete(Bill bill) { return dialogs.confirmDelete(bill); }
     public void showAbout()                 { dialogs.showAbout(); }
     public void manageUsers(AuthService auth) { dialogs.manageUsers(auth); }
+    public void showAuditLog(List<AuditLog.Entry> entries) { dialogs.showAuditLog(entries); }
     public boolean changePassword(boolean forced, ChangePasswordDialog.Change change) {
         return dialogs.changePassword(forced, change);
     }

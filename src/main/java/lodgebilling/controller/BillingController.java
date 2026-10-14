@@ -31,6 +31,7 @@ public class BillingController implements BillingActions {
 
     private final BillingModel model;
     private static final Logger LOG = Logger.getLogger(BillingController.class.getName());
+    private static final int AUDIT_ROWS_SHOWN = 500;
 
     private final BillValidator validator = new BillValidator();
     private final Stage stage;
@@ -216,6 +217,20 @@ public class BillingController implements BillingActions {
             return;
         }
         view.manageUsers(auth);
+    }
+
+    @Override
+    public void showAuditLog() {
+        if (!model.session().has(Permission.VIEW_AUDIT_LOG)) {
+            model.setStatus(StatusMessage.error("Only an admin can read the audit log."));
+            return;
+        }
+        try {
+            view.showAuditLog(audit.latest(AUDIT_ROWS_SHOWN));
+        } catch (DataException e) {
+            LOG.log(Level.SEVERE, "Reading the audit log failed", e);
+            model.setStatus(StatusMessage.error("Could not read the audit log: " + e.getMessage()));
+        }
     }
 
     @Override

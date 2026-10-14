@@ -52,6 +52,9 @@ public class AppMenuBar extends MenuBar {
         if (session.has(Permission.MANAGE_USERS)) {
             admin.getItems().add(item("Manage _users...", "Shortcut+U", actions::manageUsers));
         }
+        if (session.has(Permission.VIEW_AUDIT_LOG)) {
+            admin.getItems().add(item("_Audit log...", null, actions::showAuditLog));
+        }
         if (!admin.getItems().isEmpty()) {
             getMenus().add(admin);
         }

@@ -17,6 +17,7 @@ public interface BillingActions {
     void showAbout();
     void changePassword();
     void manageUsers();
+    void showAuditLog();
     void logout();
     void exit();
 }

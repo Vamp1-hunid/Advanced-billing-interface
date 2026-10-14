@@ -18,8 +18,10 @@ import lodgebilling.controller.BillingActions;
 import lodgebilling.model.Bill;
 import lodgebilling.model.BillingModel;
 import lodgebilling.model.Money;
+import lodgebilling.data.AuditLog;
 import lodgebilling.service.AuthService;
 
+import java.util.List;
 import java.util.Optional;
 
 /** The pop-up windows (receipt, delete confirmation, about), all owned by the main window. */
@@ -141,13 +143,17 @@ public class Dialogs {
         new UserManagementDialog(owner, model.themeProperty().get(), auth, model.session()).showAndWait();
     }
 
+    public void showAuditLog(List<AuditLog.Entry> entries) {
+        AuditLogDialog.show(owner, model.themeProperty().get(), entries);
+    }
+
     public void showAbout() {
         Alert about = new Alert(Alert.AlertType.INFORMATION);
         about.setTitle("About");
         about.setHeaderText("Lodge Billing");
         about.setContentText("Enter a guest, calculate the bill, save it as a receipt, then view, print or "
                 + "delete saved receipts from the table. Receipts are kept in a database.\n\n"
-                + "Front desk: make and print receipts. Admin: also deletes receipts and manages users.\n\n"
+                + "Front desk: make and print receipts. Admin: also deletes, users and the audit log.\n\n"
                 + "Signed in as " + model.session().user().fullName()
                 + " (" + model.session().user().role().getLabel() + ").");
         show(about);
