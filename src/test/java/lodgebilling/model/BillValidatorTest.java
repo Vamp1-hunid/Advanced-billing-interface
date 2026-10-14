@@ -55,6 +55,14 @@ class BillValidatorTest {
     }
 
     @Test
+    void usesTheCurrentRateCardNotTheOldFixedPrice() throws ValidationException {
+        RateCard card = new RateCard(java.util.Map.of(RoomType.STANDARD, new BigDecimal("400")), BigDecimal.ZERO);
+        BillInput in = validator.validate(form("John", RoomType.STANDARD, "2", "", ""), card);
+        assertEquals(new BigDecimal("400.00"), in.nightlyRate());
+        assertEquals(new BigDecimal("800.00"), Bill.of("", in).getTotal());
+    }
+
+    @Test
     void overpaymentPointsAtPaid() {
         // Standard x 1 night = 350, so paying 351 is too much
         assertEquals(FormField.PAID, errorField(form("John", RoomType.STANDARD, "1", "", "351")));

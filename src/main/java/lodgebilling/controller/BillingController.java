@@ -1,7 +1,6 @@
 package lodgebilling.controller;
 
 import javafx.stage.Stage;
-import lodgebilling.BillDao;
 import lodgebilling.model.Bill;
 import lodgebilling.model.BillInput;
 import lodgebilling.model.BillValidator;
@@ -11,8 +10,11 @@ import lodgebilling.model.Money;
 import lodgebilling.model.StatusMessage;
 import lodgebilling.model.ValidationException;
 import lodgebilling.view.MainView;
+import lodgebilling.data.DataException;
 
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * The C in MVC: turns what the user does into changes to the model.
@@ -22,19 +24,19 @@ import java.util.Optional;
  */
 public class BillingController implements BillingActions {
 
+    private static final Logger LOG = Logger.getLogger(BillingController.class.getName());
+
     private final BillingModel model;
-    private final BillDao dao;
     private final BillValidator validator = new BillValidator();
     private final Stage stage;
     private final MainView view;
     private final Runnable onLogout;
 
-    public BillingController(BillingModel model, BillDao dao, Stage stage, Runnable onLogout) {
+    public BillingController(BillingModel model, Stage stage, Runnable onLogout) {
         this.model = model;
-        this.dao = dao;
         this.stage = stage;
         this.onLogout = onLogout;
-        this.view = new MainView(model, dao.findAll(), this, stage);
+        this.view = new MainView(model, model.bills(), this, stage);
     }
 
     public MainView view() {
@@ -74,15 +76,24 @@ public class BillingController implements BillingActions {
         }
         BillInput input = read.get();
 
-        Bill existing = dao.findByGuest(input.name());
-        if (existing != null) {
-            model.setStatus(StatusMessage.error("A receipt for " + existing.getGuestName()
-                    + " is already saved as " + existing.getReceiptNumber() + ".", FormField.NAME));
+        // A returning guest may get another receipt; only an exact repeat of
+        // the receipt just saved (Save clicked twice) is refused
+        if (model.isRepeatOfLastSave(input)) {
+            model.setStatus(StatusMessage.error("This receipt is already saved as "
+                    + model.lastSavedReceiptNumber()
+                    + ". Change the details, or click New guest for the next guest."));
             view.focusField(FormField.NAME);
             return;
         }
 
-        Bill bill = dao.save(input);
+        Bill bill;
+        try {
+            bill = model.save(input);
+        } catch (DataException e) {
+            LOG.log(Level.SEVERE, "Saving a receipt failed", e);
+            model.setStatus(StatusMessage.error("Could not save the receipt: " + e.getMessage()));
+            return;
+        }
         view.clearForm();
         model.setStatus(StatusMessage.success(
                 "Saved " + bill.getReceiptNumber() + ". Balance: " + Money.format(bill.getBalance())));
@@ -91,6 +102,7 @@ public class BillingController implements BillingActions {
 
     @Override
     public void newGuest() {
+        model.forgetLastSaved();
         view.clearForm();
         view.clearSelection();
         model.setStatus(StatusMessage.info("Ready for a new guest."));
@@ -140,7 +152,13 @@ public class BillingController implements BillingActions {
             model.setStatus(StatusMessage.info("Deletion cancelled."));
             return;
         }
-        dao.delete(selected);
+        try {
+            model.delete(selected);
+        } catch (DataException e) {
+            LOG.log(Level.SEVERE, "Deleting a receipt failed", e);
+            model.setStatus(StatusMessage.error("Could not delete the receipt: " + e.getMessage()));
+            return;
+        }
         view.clearSelection();
         model.setStatus(StatusMessage.success("Receipt " + selected.getReceiptNumber() + " deleted."));
     }

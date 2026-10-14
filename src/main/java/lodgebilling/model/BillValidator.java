@@ -14,8 +14,13 @@ public class BillValidator {
     // Whole number, or up to 2 decimal places: 200, 150.5, 150.50
     private static final String MONEY_PATTERN = "\\d{1,7}(\\.\\d{1,2})?";
 
-    /** Returns the validated input, or throws with a message and the field to fix. */
+    /** Validates using the original fixed prices (kept for tests and simple use). */
     public BillInput validate(BillFormData data) throws ValidationException {
+        return validate(data, RateCard.defaults());
+    }
+
+    /** Returns the validated input, or throws with a message and the field to fix. */
+    public BillInput validate(BillFormData data, RateCard rates) throws ValidationException {
         // Clean the name: trim the ends and turn runs of spaces into one space
         String name = clean(data.name()).replaceAll("\\s+", " ");
         if (name.isEmpty()) {
@@ -54,7 +59,8 @@ public class BillValidator {
                     "Amount paid must be an amount like 1000 or 500.50 (leave blank for 0).", FormField.PAID);
         }
 
-        BillInput input = new BillInput(name, room, nights, extras, paid, clean(data.notes()));
+        BillInput input = new BillInput(name, room, rates.rateFor(room), nights, extras, paid,
+                clean(data.notes()));
 
         // Paid may not be more than the bill total
         Bill preview = Bill.of("", input);
