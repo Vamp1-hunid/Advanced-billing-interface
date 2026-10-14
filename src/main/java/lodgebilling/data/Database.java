@@ -95,7 +95,24 @@ public final class Database implements AutoCloseable {
             created_at         TEXT    NOT NULL,
             CHECK (check_out > check_in)
         )""",
-        "CREATE INDEX IF NOT EXISTS idx_res_room_dates ON reservations(room_id, check_in, check_out)"
+        "CREATE INDEX IF NOT EXISTS idx_res_room_dates ON reservations(room_id, check_in, check_out)",
+        // One line on a guest's bill: a charge (bar, laundry...) or a payment.
+        // Entries are never deleted; a mistake is voided, so the history stays.
+        """
+        CREATE TABLE IF NOT EXISTS folio_entries (
+            id              INTEGER PRIMARY KEY AUTOINCREMENT,
+            reservation_id  INTEGER NOT NULL REFERENCES reservations(id),
+            kind            TEXT    NOT NULL CHECK (kind IN ('CHARGE', 'PAYMENT', 'REFUND')),
+            category        TEXT    NOT NULL,
+            description     TEXT    NOT NULL DEFAULT '',
+            amount          TEXT    NOT NULL,
+            payer           TEXT    NOT NULL CHECK (payer IN ('GUEST', 'COMPANY')),
+            posted_at       TEXT    NOT NULL,
+            posted_by       TEXT    NOT NULL,
+            voided          INTEGER NOT NULL DEFAULT 0,
+            void_reason     TEXT    NOT NULL DEFAULT ''
+        )""",
+        "CREATE INDEX IF NOT EXISTS idx_folio_res ON folio_entries(reservation_id)"
     };
 
     private final Connection connection;

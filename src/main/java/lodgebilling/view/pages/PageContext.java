@@ -4,15 +4,20 @@ import javafx.stage.Stage;
 import lodgebilling.data.AuditLog;
 import lodgebilling.data.DataException;
 import lodgebilling.model.BillingModel;
+import lodgebilling.model.FolioEntry;
+import lodgebilling.model.Money;
 import lodgebilling.model.Reservation;
 import lodgebilling.model.StatusMessage;
 import lodgebilling.model.Theme;
 import lodgebilling.security.AccessDeniedException;
 import lodgebilling.security.Permission;
 import lodgebilling.security.Session;
+import lodgebilling.service.BalanceDueException;
 import lodgebilling.service.LodgeService;
 import lodgebilling.service.UserFacingException;
+import lodgebilling.view.Ui;
 
+import java.math.BigDecimal;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -76,13 +81,45 @@ public class PageContext {
         return false;
     }
 
-    /** Checks the guest out and reports it; the room turns Dirty until it is cleaned. */
+    /**
+     * Check-out with the safety net from the spec: if money is owed, staff are
+     * stopped; an admin is asked to confirm a forced check-out.
+     */
     public void checkOut(Reservation stay) {
-        String room = stay.room().number();
-        if (attempt(() -> lodge.checkOut(session(), stay.id()))) {
-            success(stay.guestName() + " checked out of room " + room + ". Room " + room
-                    + " is now Dirty until housekeeping cleans it.");
+        try {
+            finishCheckOut(lodge.checkOut(session(), stay.id(), false));
+        } catch (BalanceDueException due) {
+            if (!can(Permission.FORCE_CHECKOUT)) {
+                error(due.getMessage() + " (Only an admin can check out a guest who still owes money.)");
+                return;
+            }
+            boolean force = Ui.confirm(owner, theme(), "Guest still owes " + Money.format(due.balance()),
+                    stay.guestName() + " has not paid in full. Check out anyway? The debt stays on the "
+                            + "Outstanding balances report.", "Force check-out");
+            if (force) {
+                attempt(() -> finishCheckOut(lodge.checkOut(session(), stay.id(), true)));
+            } else {
+                info("Check-out cancelled.");
+            }
+        } catch (UserFacingException | AccessDeniedException e) {
+            error(e.getMessage());
+        } catch (DataException e) {
+            LOG.log(Level.SEVERE, "Database problem", e);
+            error("Database problem: " + e.getMessage());
         }
         refreshCurrentPage();
+    }
+
+    private void finishCheckOut(LodgeService.Folio folio) {
+        BigDecimal refunded = folio.entries().stream().filter(FolioEntry::isRefund)
+                .map(FolioEntry::amount).reduce(BigDecimal.ZERO, BigDecimal::add);
+        String room = folio.stay().room().number();
+        if (refunded.signum() > 0) {
+            Ui.info(owner, theme(), "Give back " + Money.format(refunded),
+                    folio.stay().guestName() + " left early and paid for nights not used. Hand back "
+                            + Money.format(refunded) + " in cash; it is recorded as a refund on the folio.");
+        }
+        success(folio.stay().guestName() + " checked out of room " + room + ". Room " + room
+                + " is now Dirty until housekeeping cleans it.");
     }
 }

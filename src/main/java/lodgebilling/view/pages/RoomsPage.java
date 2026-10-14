@@ -162,7 +162,7 @@ public class RoomsPage implements Page {
         form.onSubmit(() -> {
             Map<RoomType, BigDecimal> rates = new EnumMap<>(RoomType.class);
             for (RoomType t : RoomType.values()) {
-                rates.put(t, parseAmount(fields.get(t).getText()));
+                rates.put(t, FolioWindow.parseAmount(fields.get(t).getText()));
             }
             String v = vat.getText().trim();
             if (!v.matches("\\d{1,2}(\\.\\d{1,2})?")) {
@@ -174,13 +174,5 @@ public class RoomsPage implements Page {
             ctx.success("Prices and VAT saved.");
         }
         refresh();
-    }
-
-    private static BigDecimal parseAmount(String text) throws lodgebilling.service.LodgeException {
-        String t = text == null ? "" : text.trim().replace(",", "");
-        if (!t.matches("\\d{1,7}(\\.\\d{1,2})?")) {
-            throw new lodgebilling.service.LodgeException("Enter an amount like 150 or 150.50.");
-        }
-        return new BigDecimal(t);
     }
 }

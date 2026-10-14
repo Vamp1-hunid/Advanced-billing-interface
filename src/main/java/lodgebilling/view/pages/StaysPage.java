@@ -14,12 +14,15 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import lodgebilling.model.FolioSummary;
 import lodgebilling.model.Reservation;
 import lodgebilling.model.ReservationStatus;
 import lodgebilling.view.Ui;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.function.Predicate;
 
 /** Every booking, filterable and searchable, with the front-desk actions. */
@@ -53,6 +56,7 @@ public class StaysPage implements Page {
     private final ComboBox<Filter> filter = new ComboBox<>(FXCollections.observableArrayList(Filter.values()));
     private final TextField search = new TextField();
     private final VBox root;
+    private Map<Long, FolioSummary> sums = Map.of();
 
     public StaysPage(PageContext ctx) {
         this.ctx = ctx;
@@ -65,7 +69,7 @@ public class StaysPage implements Page {
         HBox actions = Ui.row(
                 Ui.button("New booking", this::newBooking),
                 Ui.button("Walk-in", this::walkIn),
-                Ui.button("Edit booking", this::editBooking),
+                Ui.button("Open folio", this::openFolio),
                 Ui.button("Check in", this::checkIn),
                 Ui.button("Check out", this::checkOut));
         Button cancel = Ui.button("Cancel booking", this::cancelBooking);
@@ -94,6 +98,7 @@ public class StaysPage implements Page {
                     .filter(r -> q.isEmpty() || (r.guestName() + " " + r.company() + " " + r.room().number()
                             + " " + r.reference()).toLowerCase(Locale.ROOT).contains(q))
                     .toList();
+            sums = ctx.lodge().summaries(rows);
             table.setItems(FXCollections.observableArrayList(rows));
         });
     }
@@ -116,6 +121,8 @@ public class StaysPage implements Page {
                 setGraphic(empty || s == null ? null : Ui.chip(s.toString(), s.styleClass()));
             }
         });
+        TableColumn<Reservation, BigDecimal> balance = Ui.moneyColumn("Balance",
+                r -> sums.containsKey(r.id()) ? sums.get(r.id()).balance() : null);
         ref.setPrefWidth(70);
         guest.setPrefWidth(240);
         room.setPrefWidth(60);
@@ -123,14 +130,15 @@ public class StaysPage implements Page {
         out.setPrefWidth(100);
         nights.setPrefWidth(60);
         status.setPrefWidth(120);
-        table.getColumns().setAll(List.of(ref, guest, room, in, out, nights, status));
+        balance.setPrefWidth(110);
+        table.getColumns().setAll(List.of(ref, guest, room, in, out, nights, status, balance));
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
         table.setPlaceholder(new Label("No stays match."));
         table.setOnMouseClicked(e -> {
-            if (e.getClickCount() == 2) editBooking();
+            if (e.getClickCount() == 2) openFolio();
         });
         table.setOnKeyPressed(e -> {
-            if (e.getCode() == KeyCode.ENTER) editBooking();
+            if (e.getCode() == KeyCode.ENTER) openFolio();
         });
     }
 
@@ -155,11 +163,10 @@ public class StaysPage implements Page {
         refresh();
     }
 
-    private void editBooking() {
+    private void openFolio() {
         Reservation r = selected();
         if (r != null) {
-            ReservationDialog.show(ctx, ReservationDialog.Mode.EDIT, r, null, null)
-                    .ifPresent(saved -> ctx.success("Booking " + saved.reference() + " saved."));
+            new FolioWindow(ctx, r.id()).showAndWait();
             refresh();
         }
     }

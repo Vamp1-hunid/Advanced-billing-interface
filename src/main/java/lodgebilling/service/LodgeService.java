@@ -3,10 +3,17 @@ package lodgebilling.service;
 import lodgebilling.data.AuditLog;
 import lodgebilling.data.AuditLog.Action;
 import lodgebilling.data.Database;
+import lodgebilling.data.FolioRepository;
 import lodgebilling.data.ReservationRepository;
 import lodgebilling.data.RoomRepository;
 import lodgebilling.data.SettingsRepository;
+import lodgebilling.model.ChargeCategory;
+import lodgebilling.model.FolioCalculator;
+import lodgebilling.model.FolioEntry;
+import lodgebilling.model.FolioSummary;
 import lodgebilling.model.Money;
+import lodgebilling.model.Payer;
+import lodgebilling.model.PaymentMethod;
 import lodgebilling.model.RateCard;
 import lodgebilling.model.Reservation;
 import lodgebilling.model.ReservationForm;
@@ -25,9 +32,10 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
- * The front-desk rules: rooms, prices, bookings and check-in/out.
+ * The front-desk rules: rooms, bookings, check-in/out and guest folios.
  * Every method that changes something checks the user's permission first and
  * writes an audit entry, so the screens cannot skip either.
  */
@@ -41,9 +49,13 @@ public class LodgeService {
     private static final String NAME_PATTERN = "\\p{L}+([ '’\\-.]\\p{L}+)*";
     private static final String PHONE_PATTERN = "[+0-9 ()\\-]{0,20}";
 
+    /** A record of what a stay costs, plus its lines, for the folio window. */
+    public record Folio(Reservation stay, List<FolioEntry> entries, FolioSummary summary) { }
+
     private final Database database;
     private final RoomRepository rooms;
     private final ReservationRepository reservations;
+    private final FolioRepository folios;
     private final SettingsRepository settings;
     private final AuditLog audit;
     private final Clock clock;
@@ -53,6 +65,7 @@ public class LodgeService {
         this.database = database;
         this.rooms = new RoomRepository(database);
         this.reservations = new ReservationRepository(database);
+        this.folios = new FolioRepository(database);
         this.settings = new SettingsRepository(database);
         this.audit = audit;
         this.clock = clock;
@@ -225,6 +238,11 @@ public class LodgeService {
             throw new LodgeException("A " + old.status().toString().toLowerCase() + " stay cannot be changed.");
         }
         checkForm(f, id);
+        if (f.companyPaysRoom() || hasCompanyLines(id)) {
+            if (!f.hasCompany()) {
+                throw new LodgeException("This folio has lines billed to a company. Keep the company name.");
+            }
+        }
         reservations.updateDetails(id, f.guestName(), f.phone(), f.company(), f.companyPaysRoom(), f.room().id(),
                 f.checkIn(), f.checkOut(), f.notes());
         Reservation r = reservation(id);
@@ -237,6 +255,11 @@ public class LodgeService {
         Reservation r = reservation(id);
         if (r.status() != ReservationStatus.BOOKED) {
             throw new LodgeException("Only a booking that has not arrived yet can be cancelled.");
+        }
+        Folio folio = folio(id);
+        if (folio.summary().paid().signum() > 0) {
+            throw new LodgeException("This booking has a deposit of " + Money.format(folio.summary().paid())
+                    + ". An admin must void (refund) it before the booking is cancelled.");
         }
         reservations.setStatus(id, ReservationStatus.CANCELLED);
         audit.record(session.username(), Action.BOOKING_CANCELLED, describe(r));
@@ -266,17 +289,29 @@ public class LodgeService {
     }
 
     /**
-     * Checks the guest out. Leaving early shortens the stay to the nights used
-     * (at least one). The room becomes Dirty until housekeeping cleans it.
+     * Checks the guest out. Leaving early shortens the stay to the nights used;
+     * if that means they paid too much, the change is recorded as a cash refund.
+     * With money still owed it is refused, unless force is true and the user
+     * may force a check-out (admin), in which case the debt stays on the folio.
      */
-    public Reservation checkOut(Session session, long id) throws LodgeException {
+    public Folio checkOut(Session session, long id, boolean force) throws LodgeException {
         session.require(Permission.MANAGE_RESERVATIONS);
         Reservation r = reservation(id);
         if (r.status() != ReservationStatus.CHECKED_IN) {
             throw new LodgeException("Only a guest who is in house can be checked out.");
         }
+        // Leaving before the booked date: bill only the nights used (at least one)
         LocalDate leaving = today().isAfter(r.checkIn()) ? today() : r.checkIn().plusDays(1);
         LocalDate newCheckOut = leaving.isBefore(r.checkOut()) ? leaving : r.checkOut();
+        Reservation adjusted = withCheckOut(r, newCheckOut);
+        FolioSummary summary = FolioCalculator.summarise(adjusted, folios.findForReservation(id));
+
+        if (summary.balance().signum() > 0) {
+            if (!force) {
+                throw new BalanceDueException(r.guestName(), summary.balance());
+            }
+            session.require(Permission.FORCE_CHECKOUT);
+        }
         database.inTransaction(() -> {
             if (!newCheckOut.equals(r.checkOut())) {
                 reservations.updateDetails(id, r.guestName(), r.guestPhone(), r.company(), r.companyPaysRoom(),
@@ -284,10 +319,139 @@ public class LodgeService {
             }
             reservations.setStatus(id, ReservationStatus.CHECKED_OUT);
             rooms.setStatus(r.room().id(), RoomStatus.DIRTY);
+            for (FolioSummary.PayerLine line : summary.payers()) {
+                if (line.balance().signum() < 0) {
+                    folios.insert(id, FolioEntry.Kind.REFUND, PaymentMethod.CASH.name(),
+                            "Change for nights not used", line.balance().negate(), line.payer(), now(),
+                            session.username());
+                }
+            }
             return null;
         });
-        audit.record(session.username(), Action.CHECK_OUT, describe(r));
-        return reservation(id);
+        if (summary.balance().signum() > 0) {
+            audit.record(session.username(), Action.FORCED_CHECKOUT,
+                    describe(r) + ", left owing " + Money.format(summary.balance()));
+        } else {
+            audit.record(session.username(), Action.CHECK_OUT, describe(r));
+        }
+        return folio(id);
+    }
+
+    // =====================================================================
+    // Folio: charges and payments
+    // =====================================================================
+
+    public Folio folio(long reservationId) throws LodgeException {
+        Reservation r = reservation(reservationId);
+        List<FolioEntry> entries = folios.findForReservation(reservationId);
+        return new Folio(r, entries, FolioCalculator.summarise(r, entries));
+    }
+
+    /** The worked-out bill of each given stay, using one query for all their lines. */
+    public Map<Long, FolioSummary> summaries(List<Reservation> stays) {
+        Map<Long, List<FolioEntry>> all = folios.findAllGrouped();
+        Map<Long, FolioSummary> out = new java.util.HashMap<>();
+        for (Reservation r : stays) {
+            out.put(r.id(), FolioCalculator.summarise(r, all.getOrDefault(r.id(), List.of())));
+        }
+        return out;
+    }
+
+    public FolioEntry postCharge(Session session, long reservationId, ChargeCategory category, String description,
+                                 BigDecimal amount, Payer payer) throws LodgeException {
+        session.require(Permission.POST_FOLIO);
+        Reservation r = reservation(reservationId);
+        if (!r.status().holdsRoom()) {
+            throw new LodgeException("Charges can only be added to a booked or in-house stay.");
+        }
+        Objects.requireNonNull(category, "category");
+        checkAmount(amount);
+        checkPayer(r, payer);
+        FolioEntry e = folios.insert(reservationId, FolioEntry.Kind.CHARGE, category.name(), clean(description),
+                Money.scale(amount), payer, now(), session.username());
+        audit.record(session.username(), Action.CHARGE_POSTED,
+                r.reference() + " " + category + " " + Money.format(amount) + " to " + r.payerName(payer));
+        return e;
+    }
+
+    /** One payment. Refused if it is more than that payer owes (stops typing 10000 for 1000). */
+    public FolioEntry recordPayment(Session session, long reservationId, PaymentMethod method, BigDecimal amount,
+                                    Payer payer, String reference) throws LodgeException {
+        session.require(Permission.POST_FOLIO);
+        Folio folio = folio(reservationId);
+        Reservation r = folio.stay();
+        if (r.status() == ReservationStatus.CANCELLED) {
+            throw new LodgeException("This booking was cancelled.");
+        }
+        Objects.requireNonNull(method, "method");
+        checkAmount(amount);
+        checkPayer(r, payer);
+        BigDecimal owed = owedBy(folio.summary(), payer);
+        if (amount.compareTo(owed) > 0) {
+            throw new LodgeException(r.payerName(payer) + " owes only " + Money.format(owed) + ".");
+        }
+        FolioEntry e = folios.insert(reservationId, FolioEntry.Kind.PAYMENT, method.name(), clean(reference),
+                Money.scale(amount), payer, now(), session.username());
+        audit.record(session.username(), Action.PAYMENT_RECORDED,
+                r.reference() + " " + method + " " + Money.format(amount) + " from " + r.payerName(payer));
+        return e;
+    }
+
+    /** Split payment: the guest and the company each pay their share at once, all or nothing. */
+    public void recordSplitPayment(Session session, long reservationId, PaymentMethod guestMethod,
+                                   BigDecimal guestAmount, PaymentMethod companyMethod, BigDecimal companyAmount,
+                                   String reference) throws LodgeException {
+        session.require(Permission.POST_FOLIO);
+        Folio folio = folio(reservationId);
+        if (!folio.stay().hasCompany()) {
+            throw new LodgeException("Add a company to the booking to split the bill.");
+        }
+        boolean guestPays = guestAmount != null && guestAmount.signum() > 0;
+        boolean companyPays = companyAmount != null && companyAmount.signum() > 0;
+        if (!guestPays && !companyPays) {
+            throw new LodgeException("Enter at least one amount.");
+        }
+        try {
+            database.inTransaction(() -> {
+                try {
+                    if (guestPays) {
+                        recordPayment(session, reservationId, guestMethod, guestAmount, Payer.GUEST, reference);
+                    }
+                    if (companyPays) {
+                        recordPayment(session, reservationId, companyMethod, companyAmount, Payer.COMPANY, reference);
+                    }
+                } catch (LodgeException e) {
+                    throw new Rollback(e);   // undo the first payment if the second is refused
+                }
+                return null;
+            });
+        } catch (Rollback r) {
+            throw r.cause;
+        }
+    }
+
+    /** Carries a checked exception out of a transaction so it can be rolled back. */
+    private static final class Rollback extends RuntimeException {
+        final LodgeException cause;
+        Rollback(LodgeException cause) {
+            super(cause.getMessage(), null, false, false);
+            this.cause = cause;
+        }
+    }
+
+    /** Cancels a line posted by mistake. The line stays visible, struck through, with the reason. */
+    public void voidEntry(Session session, FolioEntry entry, String reason) throws LodgeException {
+        session.require(Permission.VOID_FOLIO_ENTRY);
+        String why = clean(reason);
+        if (why.length() < 3) {
+            throw new LodgeException("Give a reason for voiding (e.g. \"posted to wrong room\").");
+        }
+        if (entry.voided()) {
+            throw new LodgeException("That line is already void.");
+        }
+        folios.voidEntry(entry.id(), why);
+        audit.record(session.username(), Action.ENTRY_VOIDED, "BK" + String.format("%04d", entry.reservationId())
+                + " " + entry.kind() + " " + Money.format(entry.amount()) + ": " + why);
     }
 
     // =====================================================================
@@ -333,6 +497,42 @@ public class LodgeService {
             case MAINTENANCE -> throw new LodgeException("Room " + room.number() + " is under maintenance.");
             case OCCUPIED -> throw new LodgeException("Room " + room.number() + " still has a guest in it.");
         }
+    }
+
+    private static void checkAmount(BigDecimal amount) throws LodgeException {
+        if (amount == null || amount.signum() <= 0) {
+            throw new LodgeException("Enter an amount above zero.");
+        }
+        if (amount.scale() > 2) {
+            throw new LodgeException("Amounts have at most 2 decimal places.");
+        }
+        if (amount.compareTo(MAX_AMOUNT) > 0) {
+            throw new LodgeException("That amount is too large. Check for a typo.");
+        }
+    }
+
+    private static void checkPayer(Reservation r, Payer payer) throws LodgeException {
+        if (payer == null) {
+            throw new LodgeException("Choose who pays.");
+        }
+        if (payer == Payer.COMPANY && !r.hasCompany()) {
+            throw new LodgeException("This booking has no company. Edit the booking to add one.");
+        }
+    }
+
+    private static BigDecimal owedBy(FolioSummary s, Payer payer) {
+        return s.payers().stream().filter(p -> p.payer() == payer).findFirst()
+                .map(FolioSummary.PayerLine::balance).orElse(BigDecimal.ZERO);
+    }
+
+    private boolean hasCompanyLines(long reservationId) {
+        return folios.findForReservation(reservationId).stream()
+                .anyMatch(e -> !e.voided() && e.payer() == Payer.COMPANY);
+    }
+
+    private static Reservation withCheckOut(Reservation r, LocalDate checkOut) {
+        return new Reservation(r.id(), r.guestName(), r.guestPhone(), r.company(), r.companyPaysRoom(), r.room(),
+                r.checkIn(), checkOut, r.status(), r.nightlyRate(), r.vatPercent(), r.notes(), r.createdBy());
     }
 
     private static String describe(Reservation r) {

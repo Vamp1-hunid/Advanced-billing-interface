@@ -30,6 +30,10 @@ public record Reservation(long id, String guestName, String guestPhone, String c
         return String.format("BK%04d", id);   // BK = booking; receipts use R001
     }
 
+    public String payerName(Payer payer) {
+        return payer == Payer.COMPANY && hasCompany() ? company : guestName;
+    }
+
     // JavaBean getters for TableView columns
     public String getReference()           { return reference(); }
     public String getGuestName()           { return guestName; }
