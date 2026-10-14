@@ -21,15 +21,23 @@ public class Bill {
     private final BigDecimal paid;
     private final String notes;
 
-    private final LocalDateTime issuedAt = LocalDateTime.now();
+    private final LocalDateTime issuedAt;
 
     private final BigDecimal roomCharge;
     private final BigDecimal discount;
     private final BigDecimal total;
     private final BigDecimal balance;
 
+    /** A new bill, issued right now. */
     public Bill(String receiptNumber, String guestName, RoomType roomType, int nights,
                 BigDecimal extras, BigDecimal paid, String notes) {
+        this(receiptNumber, guestName, roomType, nights, extras, paid, notes, LocalDateTime.now());
+    }
+
+    /** A bill with a given issue date, used when loading saved receipts. */
+    public Bill(String receiptNumber, String guestName, RoomType roomType, int nights,
+                BigDecimal extras, BigDecimal paid, String notes, LocalDateTime issuedAt) {
+        this.issuedAt = issuedAt;
         this.receiptNumber = receiptNumber;
         this.guestName = guestName;
         this.roomType = roomType;
