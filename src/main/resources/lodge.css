@@ -372,3 +372,4 @@
 .receipt-paper .label.receipt-stamp-due { -fx-text-fill: #b03030; -fx-border-color: #b03030; }
 .main-scroll, .main-scroll > .viewport { -fx-background-color: transparent; -fx-background: transparent; }
 .receipt-scroll, .receipt-scroll > .viewport { -fx-background-color: transparent; -fx-background: transparent; }
+.bill-table { -fx-background-radius: 8; -fx-border-radius: 8; }
