@@ -21,6 +21,7 @@ import lodgebilling.security.Permission;
 import lodgebilling.view.FormDialog;
 import lodgebilling.view.Ui;
 
+import java.math.BigDecimal;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +45,8 @@ public class RoomsPage implements Page {
                 Ui.button("Mark dirty", () -> setStatus(RoomStatus.DIRTY)),
                 Ui.button("Maintenance", () -> setStatus(RoomStatus.MAINTENANCE)));
         if (ctx.can(Permission.MANAGE_ROOMS)) {
-            actions.getChildren().addAll(Ui.spacer(), Ui.button("Add room", this::addRoom));
+            actions.getChildren().addAll(Ui.spacer(), Ui.button("Add room", this::addRoom),
+                    Ui.button("Rates & VAT", this::editRates));
         }
         ScrollPane scroll = new ScrollPane(tiles);
         scroll.setFitToWidth(true);
@@ -85,7 +87,7 @@ public class RoomsPage implements Page {
     private Node tile(Room room, Long selectedId) {
         Label number = new Label(room.number());
         number.getStyleClass().add("tile-number");
-        Label type = new Label(room.type() + "  " + Money.format(room.type().getNightlyRate()));
+        Label type = new Label(room.type() + "  " + Money.format(ctx.lodge().rateCard().rateFor(room.type())));
         type.getStyleClass().add("tile-type");
         Label status = Ui.chip(room.status().toString(), room.status().styleClass());
         VBox box = new VBox(4, number, type, status);
@@ -130,5 +132,41 @@ public class RoomsPage implements Page {
             ctx.success("Room " + number.getText().trim() + " added.");
         }
         refresh();
+    }
+
+    private void editRates() {
+        FormDialog form = new FormDialog(ctx.owner(), ctx.theme(), "Rates & VAT", "Prices per night (VAT excluded)",
+                "Save prices", "Cancel");
+        Map<RoomType, TextField> fields = new EnumMap<>(RoomType.class);
+        for (RoomType t : RoomType.values()) {
+            fields.put(t, form.add(t + " in K", new TextField(ctx.lodge().rateCard().rateFor(t).toPlainString())));
+        }
+        TextField vat = form.add("VAT %", new TextField(
+                ctx.lodge().rateCard().vatPercent().stripTrailingZeros().toPlainString()));
+        form.addNote("New prices apply to new bookings and receipts only. Existing bookings keep the "
+                + "price they were booked at.");
+        form.onSubmit(() -> {
+            Map<RoomType, BigDecimal> rates = new EnumMap<>(RoomType.class);
+            for (RoomType t : RoomType.values()) {
+                rates.put(t, parseAmount(fields.get(t).getText()));
+            }
+            String v = vat.getText().trim();
+            if (!v.matches("\\d{1,2}(\\.\\d{1,2})?")) {
+                throw new lodgebilling.service.LodgeException("Enter VAT as a number, e.g. 16.");
+            }
+            ctx.lodge().saveRates(ctx.session(), rates, new BigDecimal(v));
+        });
+        if (form.showAndWait()) {
+            ctx.success("Prices and VAT saved.");
+        }
+        refresh();
+    }
+
+    private static BigDecimal parseAmount(String text) throws lodgebilling.service.LodgeException {
+        String t = text == null ? "" : text.trim().replace(",", "");
+        if (!t.matches("\\d{1,7}(\\.\\d{1,2})?")) {
+            throw new lodgebilling.service.LodgeException("Enter an amount like 150 or 150.50.");
+        }
+        return new BigDecimal(t);
     }
 }

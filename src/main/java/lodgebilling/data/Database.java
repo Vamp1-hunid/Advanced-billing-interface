@@ -56,6 +56,18 @@ public final class Database implements AutoCloseable {
         )""",
         "CREATE INDEX IF NOT EXISTS idx_audit_at ON audit_log(at)",
         """
+        CREATE TABLE IF NOT EXISTS settings (
+            key    TEXT PRIMARY KEY,
+            value  TEXT NOT NULL
+        )""",
+        // Current price per night of each room type. Bookings and bills copy the
+        // price at the time, so changing a rate never rewrites old bills.
+        """
+        CREATE TABLE IF NOT EXISTS room_rates (
+            room_type     TEXT PRIMARY KEY CHECK (room_type IN ('STANDARD', 'DELUXE', 'FAMILY')),
+            nightly_rate  TEXT NOT NULL
+        )""",
+        """
         CREATE TABLE IF NOT EXISTS rooms (
             id         INTEGER PRIMARY KEY AUTOINCREMENT,
             number     TEXT    NOT NULL UNIQUE,

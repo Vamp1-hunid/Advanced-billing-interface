@@ -21,7 +21,6 @@ import lodgebilling.model.Bill;
 import lodgebilling.model.BillFormData;
 import lodgebilling.model.BillingModel;
 import lodgebilling.model.FormField;
-import lodgebilling.model.RateCard;
 import lodgebilling.security.Permission;
 import lodgebilling.service.AuthService;
 import lodgebilling.service.LodgeService;
@@ -66,7 +65,7 @@ public class MainView extends BorderPane {
         this.form = new BillFormView(actions, model.statusProperty());
         this.table = new BillTableView(model.bills(), actions::viewReceipt, actions::deleteSelected);
         this.toolBar = new AppToolBar(actions, model);
-        this.pricePanel = new PricePanel(RateCard.defaults());   // editable rates come next
+        this.pricePanel = new PricePanel(lodge.rateCard());
         this.dialogs = new Dialogs(stage, model, actions);
         this.header = new AppHeader(model, actions);
         this.pageContext = new PageContext(stage, model, lodge, audit);

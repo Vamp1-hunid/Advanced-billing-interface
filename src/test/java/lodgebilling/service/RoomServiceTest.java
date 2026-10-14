@@ -13,14 +13,17 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.EnumMap;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-/** Rooms and housekeeping: who may change what, and the rules on room status. */
+/** Rooms, housekeeping and prices: who may change what, and the rules. */
 class RoomServiceTest {
 
     private static final Session ADMIN = new Session(new User(1, "boss", "Boss", Role.ADMIN, true, false));
@@ -74,5 +77,37 @@ class RoomServiceTest {
         assertEquals(10, lodge.rooms().size());
         assertThrows(LodgeException.class, () -> lodge.addRoom(ADMIN, "105", RoomType.DELUXE));
         assertThrows(LodgeException.class, () -> lodge.addRoom(ADMIN, "1 0 5", RoomType.DELUXE));
+    }
+
+    @Test
+    void firstRunSeedsTheOriginalPricesAndSixteenPercentVat() {
+        assertEquals(new BigDecimal("550.00"), lodge.rateCard().rateFor(RoomType.DELUXE));
+        assertEquals(0, new BigDecimal("16").compareTo(lodge.rateCard().vatPercent()));
+    }
+
+    @Test
+    void onlyAnAdminChangesPricesAndTheyAreKeptAfterRestart() throws LodgeException {
+        Map<RoomType, BigDecimal> rates = new EnumMap<>(RoomType.class);
+        rates.put(RoomType.STANDARD, new BigDecimal("400"));
+        rates.put(RoomType.DELUXE, new BigDecimal("600"));
+        rates.put(RoomType.FAMILY, new BigDecimal("900"));
+        assertThrows(AccessDeniedException.class, () -> lodge.saveRates(DESK, rates, BigDecimal.TEN));
+        lodge.saveRates(ADMIN, rates, BigDecimal.TEN);
+
+        // A new service on the same database, as after restarting the app
+        LodgeService restarted = new LodgeService(db, new AuditLog(db, Clock.systemUTC()), Clock.systemUTC());
+        assertEquals(new BigDecimal("600.00"), restarted.rateCard().rateFor(RoomType.DELUXE));
+        assertEquals(0, BigDecimal.TEN.compareTo(restarted.rateCard().vatPercent()));
+    }
+
+    @Test
+    void badPricesAreRefused() {
+        Map<RoomType, BigDecimal> rates = new EnumMap<>(RoomType.class);
+        rates.put(RoomType.STANDARD, BigDecimal.ZERO);
+        rates.put(RoomType.DELUXE, new BigDecimal("600"));
+        rates.put(RoomType.FAMILY, new BigDecimal("900"));
+        assertThrows(LodgeException.class, () -> lodge.saveRates(ADMIN, rates, BigDecimal.TEN));
+        rates.put(RoomType.STANDARD, new BigDecimal("400"));
+        assertThrows(LodgeException.class, () -> lodge.saveRates(ADMIN, rates, new BigDecimal("75")));
     }
 }

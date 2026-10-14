@@ -250,7 +250,7 @@ public class BillingController implements BillingActions {
     /** Reads and validates the form. On a problem, shows the message and focuses the field. */
     private Optional<BillInput> readForm() {
         try {
-            return Optional.of(validator.validate(view.readForm()));
+            return Optional.of(validator.validate(view.readForm(), lodge.rateCard()));
         } catch (ValidationException e) {
             model.setStatus(StatusMessage.error(e.getMessage(), e.field()));
             view.focusField(e.field());
