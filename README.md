@@ -13,6 +13,7 @@ A desktop application (JavaFX) that lets lodge staff sign in, record a guest's s
 - View and print a receipt, delete a receipt
 - Light and dark mode
 - Keyboard shortcuts for common actions
+- Receipts are now saved between sessions
 
 ## Billing rules
 
