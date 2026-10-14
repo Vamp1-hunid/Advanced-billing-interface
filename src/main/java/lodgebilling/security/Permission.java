@@ -5,10 +5,14 @@ package lodgebilling.security;
  * so adding a role only means editing {@link Role}.
  */
 public enum Permission {
-    // Receipts (the walk-in billing screen)
+    // Receipts (the original walk-in billing screen)
     CREATE_BILL,
     PRINT_RECEIPT,
     DELETE_BILL,
+
+    // Rooms
+    UPDATE_ROOM_STATUS,    // clean / dirty / maintenance
+    MANAGE_ROOMS,          // add rooms, change rates and VAT
 
     // Admin
     MANAGE_USERS,

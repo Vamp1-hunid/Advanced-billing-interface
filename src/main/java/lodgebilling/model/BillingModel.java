@@ -23,7 +23,7 @@ import java.time.LocalDateTime;
 public class BillingModel {
 
     private static final StatusMessage READY =
-            StatusMessage.info("Enter the guest's details, then calculate or save the receipt.");
+            StatusMessage.info("Ready.");   // the status bar is shared by every page now
 
     private final BillRepository repository;
     private final AuditLog audit;

@@ -54,7 +54,15 @@ public final class Database implements AutoCloseable {
             action    TEXT NOT NULL,
             details   TEXT NOT NULL DEFAULT ''
         )""",
-        "CREATE INDEX IF NOT EXISTS idx_audit_at ON audit_log(at)"
+        "CREATE INDEX IF NOT EXISTS idx_audit_at ON audit_log(at)",
+        """
+        CREATE TABLE IF NOT EXISTS rooms (
+            id         INTEGER PRIMARY KEY AUTOINCREMENT,
+            number     TEXT    NOT NULL UNIQUE,
+            room_type  TEXT    NOT NULL CHECK (room_type IN ('STANDARD', 'DELUXE', 'FAMILY')),
+            status     TEXT    NOT NULL DEFAULT 'AVAILABLE'
+                       CHECK (status IN ('AVAILABLE', 'OCCUPIED', 'DIRTY', 'MAINTENANCE'))
+        )"""
     };
 
     private final Connection connection;

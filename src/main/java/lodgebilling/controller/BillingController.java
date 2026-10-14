@@ -16,6 +16,7 @@ import lodgebilling.data.DataException;
 import lodgebilling.security.AccessDeniedException;
 import lodgebilling.security.Permission;
 import lodgebilling.service.AuthService;
+import lodgebilling.service.LodgeService;
 
 import java.util.Optional;
 import java.util.logging.Level;
@@ -39,18 +40,20 @@ public class BillingController implements BillingActions {
     private final AuthService auth;
     private final AuditLog audit;
     private final Runnable onLogout;
+    private final LodgeService lodge;
 
     /**
      * @param onLogout called after the user logs out, to show the sign-in screen again
      */
     public BillingController(BillingModel model, Stage stage, AuthService auth, AuditLog audit,
-                             Runnable onLogout) {
+                             LodgeService lodge, Runnable onLogout) {
+        this.lodge = lodge;
         this.model = model;
         this.stage = stage;
         this.auth = auth;
         this.audit = audit;
         this.onLogout = onLogout;
-        this.view = new MainView(model, this, stage);
+        this.view = new MainView(model, this, stage, lodge, audit);
     }
 
     public MainView view() {

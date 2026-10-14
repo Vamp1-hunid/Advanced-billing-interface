@@ -17,7 +17,8 @@ public class AuditLog {
         SETUP, LOGIN, LOGIN_FAILED, LOGOUT, ACCOUNT_LOCKED,
         BILL_SAVED, BILL_DELETED,
         USER_CREATED, USER_ENABLED, USER_DISABLED, ROLE_CHANGED, PASSWORD_RESET, PASSWORD_CHANGED,
-        RECEIPTS_IMPORTED
+        RECEIPTS_IMPORTED,
+        ROOM_ADDED, ROOM_STATUS
     }
 
     /** One row of the log, with JavaBean getters for the table. */

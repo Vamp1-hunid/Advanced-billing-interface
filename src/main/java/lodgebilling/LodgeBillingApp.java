@@ -18,6 +18,7 @@ import lodgebilling.data.DataException;
 import lodgebilling.data.Database;
 import lodgebilling.data.LegacyReceiptImporter;
 import lodgebilling.data.UserRepository;
+import lodgebilling.service.LodgeService;
 import lodgebilling.model.BillingModel;
 import lodgebilling.model.Theme;
 import lodgebilling.model.User;
@@ -56,6 +57,7 @@ public class LodgeBillingApp extends Application {
     private AuthService auth;
     private AuditLog audit;
     private BillRepository bills;
+    private LodgeService lodge;
     private BillingController current;
     private AuthCard authCard;           // the sign-in or setup screen while it is showing
     // Kept across logins, and shared with the sign-in screen's light/dark switch
@@ -79,6 +81,8 @@ public class LodgeBillingApp extends Application {
         auth = new AuthService(new UserRepository(database), audit, new PasswordHasher(), clock);
         // Receipts saved by the older version (receipts.tsv) are copied in once
         LegacyReceiptImporter.importOnce(database, audit, LegacyReceiptImporter.defaultFile());
+        // Business dates (arrivals, check-out) use the computer's own time zone
+        lodge = new LodgeService(database, audit, Clock.systemDefaultZone());
 
         // Open at a comfortable size, but never bigger than the screen (minus the taskbar)
         Rectangle2D screen = Screen.getPrimary().getVisualBounds();
@@ -137,7 +141,7 @@ public class LodgeBillingApp extends Application {
     private void signedIn(User user) {
         Session session = new Session(user);
         BillingModel model = new BillingModel(bills, audit, session, theme.get());
-        current = new BillingController(model, stage, auth, audit, this::logout);
+        current = new BillingController(model, stage, auth, audit, lodge, this::logout);
         authCard = null;
         scene.setRoot(current.view());
         current.view().install(scene);
