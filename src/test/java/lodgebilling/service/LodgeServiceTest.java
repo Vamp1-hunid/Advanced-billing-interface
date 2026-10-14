@@ -103,6 +103,7 @@ class LodgeServiceTest {
                 () -> lodge.book(CLEANER, form("John Phiri", "201", TODAY, TODAY.plusDays(1))));
         assertThrows(AccessDeniedException.class,
                 () -> lodge.recordPayment(CLEANER, 1, PaymentMethod.CASH, k("10"), Payer.GUEST, ""));
+        assertThrows(AccessDeniedException.class, () -> lodge.dashboard(CLEANER));
     }
 
     @Test
@@ -240,5 +241,16 @@ class LodgeServiceTest {
         lodge.cancel(DESK, r.id());
         assertEquals(ReservationStatus.CANCELLED, lodge.reservation(r.id()).status());
         assertTrue(lodge.freeRooms(TODAY.plusDays(5), TODAY.plusDays(6), 0).contains(room("103")));
+    }
+
+    @Test
+    void dashboardShowsArrivalsDeparturesAndOccupancy() throws LodgeException {
+        lodge.book(DESK, form("Arriving Guest", "101", TODAY, TODAY.plusDays(2)));
+        lodge.walkIn(DESK, form("Staying Guest", "102", TODAY, TODAY.plusDays(1)));
+        var d = lodge.dashboard(DESK);
+        assertEquals(1, d.arrivals().size());
+        assertEquals(1, d.inHouse());
+        assertEquals(1, d.roomsByStatus().get(RoomStatus.OCCUPIED));
+        assertTrue(d.occupancyPercent() > 11 && d.occupancyPercent() < 12);   // 1 of 9
     }
 }

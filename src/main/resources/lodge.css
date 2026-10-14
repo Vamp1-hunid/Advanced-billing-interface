@@ -375,7 +375,7 @@
 
 /* =====================================================================
    Screens added with the database and front-desk work (sign-in/setup
-   cards, user badge, sidebar, tape chart, rooms, folio).
+   cards, user badge, sidebar, dashboard, tape chart, rooms, folio).
    They use the same palette names as above, plus a few of their own
    defined here for both themes so they sit well on the aurora.
    ===================================================================== */
@@ -479,6 +479,15 @@
     -fx-font-weight: bold;
 }
 
+/* ---------- Metric cards: coloured top strip ---------- */
+.metric { -fx-padding: 16 18 16 18; -fx-min-width: 150; }
+.metric-value { -fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: -title; }
+.metric-caption { -fx-font-size: 12px; -fx-text-fill: -text-muted; }
+.metric-ok       { -fx-border-color: -ok -glass-border -glass-border -glass-border;      -fx-border-width: 4 1 1 1; }
+.metric-overdue  { -fx-border-color: -busy -glass-border -glass-border -glass-border;    -fx-border-width: 4 1 1 1; }
+.metric-occupied { -fx-border-color: -busy -glass-border -glass-border -glass-border;    -fx-border-width: 4 1 1 1; }
+.metric-pending  { -fx-border-color: -pending -glass-border -glass-border -glass-border; -fx-border-width: 4 1 1 1; }
+
 /* ---------- Status chips ---------- */
 .chip {
     -fx-padding: 3 12 3 12;
@@ -574,6 +583,7 @@
 .table-row-cell.voided .table-cell { -fx-strikethrough: true; -fx-text-fill: -text-muted; -fx-opacity: 0.7; }
 .split-grid { -fx-padding: 10 0 0 0; }
 .button.compact { -fx-min-width: 0; -fx-padding: 9 16 9 16; -fx-min-height: 40px; }
+.metric-value { -fx-font-size: 22px; }
 
 /* The frosted layer under each page of the main window */
 .page-area { -fx-background-color: rgba(240,246,255,0.55); }

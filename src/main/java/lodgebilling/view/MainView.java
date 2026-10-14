@@ -25,6 +25,7 @@ import lodgebilling.model.FormField;
 import lodgebilling.security.Permission;
 import lodgebilling.service.AuthService;
 import lodgebilling.service.LodgeService;
+import lodgebilling.view.pages.DashboardPage;
 import lodgebilling.view.pages.Page;
 import lodgebilling.view.pages.PageContext;
 import lodgebilling.view.pages.ReservationDialog;
@@ -114,6 +115,7 @@ public class MainView extends BorderPane {
 
     private Page createPage(AppPage p) {
         return switch (p) {
+            case DASHBOARD -> new DashboardPage(pageContext);
             case TAPE_CHART -> new TapeChartPage(pageContext);
             case STAYS -> new StaysPage(pageContext);
             case ROOMS -> new RoomsPage(pageContext);
