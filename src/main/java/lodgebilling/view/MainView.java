@@ -131,4 +131,7 @@ public class MainView extends BorderPane {
     public boolean printReceipt(Bill bill)  { return dialogs.printReceipt(bill); }
     public boolean confirmDelete(Bill bill) { return dialogs.confirmDelete(bill); }
     public void showAbout()                 { dialogs.showAbout(); }
+    public boolean changePassword(boolean forced, ChangePasswordDialog.Change change) {
+        return dialogs.changePassword(forced, change);
+    }
 }

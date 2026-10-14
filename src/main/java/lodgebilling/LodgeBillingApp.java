@@ -148,6 +148,15 @@ public class LodgeBillingApp extends Application {
         fadeIn.setToValue(1);
         fadeIn.play();
         stage.setTitle("Lodge Billing - " + user.fullName() + " (" + user.role().getLabel() + ")");
+
+        // An admin set a temporary password: the user must replace it before working
+        if (user.mustChangePassword()) {
+            boolean changed = current.view().changePassword(true,
+                    (oldPw, newPw) -> auth.changeOwnPassword(session, oldPw, newPw));
+            if (!changed) {
+                logout();
+            }
+        }
     }
 
     private void logout() {

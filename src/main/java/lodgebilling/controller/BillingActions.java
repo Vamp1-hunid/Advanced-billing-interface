@@ -15,6 +15,7 @@ public interface BillingActions {
     void deleteSelected();
     void toggleTheme();
     void showAbout();
+    void changePassword();
     void logout();
     void exit();
 }

@@ -37,6 +37,7 @@ public class AppMenuBar extends MenuBar {
             file.getItems().add(new SeparatorMenuItem());
         }
         file.getItems().addAll(
+                item("Change pass_word...", null, actions::changePassword),
                 item("_Log out", "Shortcut+L", actions::logout),
                 item("_Close", "Shortcut+Q", actions::exit));
 

@@ -131,6 +131,11 @@ public class Dialogs {
         return show(confirm).orElse(ButtonType.CANCEL) == delete;
     }
 
+    /** @return true if the password was changed */
+    public boolean changePassword(boolean forced, ChangePasswordDialog.Change change) {
+        return ChangePasswordDialog.show(owner, model.themeProperty().get(), forced, change);
+    }
+
     public void showAbout() {
         Alert about = new Alert(Alert.AlertType.INFORMATION);
         about.setTitle("About");

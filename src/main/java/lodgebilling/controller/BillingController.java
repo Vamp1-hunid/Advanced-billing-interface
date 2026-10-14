@@ -201,6 +201,15 @@ public class BillingController implements BillingActions {
     }
 
     @Override
+    public void changePassword() {
+        boolean changed = view.changePassword(false,
+                (current, replacement) -> auth.changeOwnPassword(model.session(), current, replacement));
+        if (changed) {
+            model.setStatus(StatusMessage.success("Your password has been changed."));
+        }
+    }
+
+    @Override
     public void logout() {
         auth.logout(model.session());
         onLogout.run();
