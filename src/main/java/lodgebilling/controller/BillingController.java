@@ -8,9 +8,14 @@ import lodgebilling.model.BillingModel;
 import lodgebilling.model.FormField;
 import lodgebilling.model.Money;
 import lodgebilling.model.StatusMessage;
+import lodgebilling.model.Theme;
 import lodgebilling.model.ValidationException;
 import lodgebilling.view.MainView;
+import lodgebilling.data.AuditLog;
 import lodgebilling.data.DataException;
+import lodgebilling.security.AccessDeniedException;
+import lodgebilling.security.Permission;
+import lodgebilling.service.AuthService;
 
 import java.util.Optional;
 import java.util.logging.Level;
@@ -24,23 +29,36 @@ import java.util.logging.Logger;
  */
 public class BillingController implements BillingActions {
 
+    private final BillingModel model;
     private static final Logger LOG = Logger.getLogger(BillingController.class.getName());
 
-    private final BillingModel model;
     private final BillValidator validator = new BillValidator();
     private final Stage stage;
     private final MainView view;
+    private final AuthService auth;
+    private final AuditLog audit;
     private final Runnable onLogout;
 
-    public BillingController(BillingModel model, Stage stage, Runnable onLogout) {
+    /**
+     * @param onLogout called after the user logs out, to show the sign-in screen again
+     */
+    public BillingController(BillingModel model, Stage stage, AuthService auth, AuditLog audit,
+                             Runnable onLogout) {
         this.model = model;
         this.stage = stage;
+        this.auth = auth;
+        this.audit = audit;
         this.onLogout = onLogout;
-        this.view = new MainView(model, model.bills(), this, stage);
+        this.view = new MainView(model, this, stage);
     }
 
     public MainView view() {
         return view;
+    }
+
+    /** The colour scheme in use, so it can carry over to the next sign-in. */
+    public Theme theme() {
+        return model.themeProperty().get();
     }
 
     /**
@@ -76,8 +94,6 @@ public class BillingController implements BillingActions {
         }
         BillInput input = read.get();
 
-        // A returning guest may get another receipt; only an exact repeat of
-        // the receipt just saved (Save clicked twice) is refused
         if (model.isRepeatOfLastSave(input)) {
             model.setStatus(StatusMessage.error("This receipt is already saved as "
                     + model.lastSavedReceiptNumber()
@@ -89,8 +105,11 @@ public class BillingController implements BillingActions {
         Bill bill;
         try {
             bill = model.save(input);
+        } catch (AccessDeniedException e) {
+            model.setStatus(StatusMessage.error(e.getMessage()));
+            return;
         } catch (DataException e) {
-            LOG.log(Level.SEVERE, "Saving a receipt failed", e);
+            LOG.log(Level.SEVERE, "Saving a bill failed", e);
             model.setStatus(StatusMessage.error("Could not save the receipt: " + e.getMessage()));
             return;
         }
@@ -148,14 +167,22 @@ public class BillingController implements BillingActions {
             return;
         }
 
+        // Checked before asking, so staff are not shown a confirmation they cannot act on
+        if (!model.session().has(Permission.DELETE_BILL)) {
+            model.setStatus(StatusMessage.error("Only an admin can delete receipts."));
+            return;
+        }
         if (!view.confirmDelete(selected)) {
             model.setStatus(StatusMessage.info("Deletion cancelled."));
             return;
         }
         try {
             model.delete(selected);
+        } catch (AccessDeniedException e) {
+            model.setStatus(StatusMessage.error(e.getMessage()));
+            return;
         } catch (DataException e) {
-            LOG.log(Level.SEVERE, "Deleting a receipt failed", e);
+            LOG.log(Level.SEVERE, "Deleting a bill failed", e);
             model.setStatus(StatusMessage.error("Could not delete the receipt: " + e.getMessage()));
             return;
         }
@@ -175,7 +202,7 @@ public class BillingController implements BillingActions {
 
     @Override
     public void logout() {
-        view.stopBackground();
+        auth.logout(model.session());
         onLogout.run();
     }
 

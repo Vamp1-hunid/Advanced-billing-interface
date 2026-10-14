@@ -40,6 +40,7 @@ public class ReceiptView extends VBox {
                 infoRow("Receipt no.", bill.getReceiptNumber()),
                 infoRow("Date", bill.getIssuedAt().format(DATE_FORMAT)),
                 infoRow("Guest", bill.getGuestName()),
+                infoRow("Served by", bill.getCreatedBy()),
                 dottedRule(),
                 charges(bill),
                 solidRule(),
@@ -73,9 +74,9 @@ public class ReceiptView extends VBox {
         VBox box = new VBox(4);
         box.getChildren().add(text(bill.getRoomType() + " room", "receipt-text"));
         box.getChildren().add(line("  " + bill.getNights() + " night(s) x "
-                + Money.format(bill.getRoomType().getNightlyRate()), Money.format(bill.getRoomCharge())));
+                + Money.format(bill.getNightlyRate()), Money.format(bill.getRoomCharge())));
         if (bill.getDiscount().signum() > 0) {
-            box.getChildren().add(line("  Discount (5%)", "- " + Money.format(bill.getDiscount())));
+            box.getChildren().add(line("  Discount (" + Bill.discountPercentLabel() + ")", "- " + Money.format(bill.getDiscount())));
         }
         if (bill.getExtras().signum() > 0) {
             box.getChildren().add(line("Extras", Money.format(bill.getExtras())));
@@ -111,7 +112,7 @@ public class ReceiptView extends VBox {
         return box;
     }
 
-    /** Decorative barcode: the same receipt number always gives the same bars. */
+    /** Decorative barcode: the same bill number always gives the same bars. */
     private Node barcode(Bill bill) {
         Random random = new Random(bill.getReceiptNumber().hashCode());
         HBox bars = new HBox(2);

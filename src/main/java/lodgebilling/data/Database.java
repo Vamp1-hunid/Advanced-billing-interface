@@ -21,6 +21,19 @@ public final class Database implements AutoCloseable {
     // rounded by floating point. Timestamps are ISO-8601 TEXT, which sorts correctly.
     private static final String[] SCHEMA = {
         """
+        CREATE TABLE IF NOT EXISTS users (
+            id                   INTEGER PRIMARY KEY AUTOINCREMENT,
+            username             TEXT    NOT NULL UNIQUE COLLATE NOCASE,
+            full_name            TEXT    NOT NULL,
+            role                 TEXT    NOT NULL CHECK (role IN ('ADMIN', 'STAFF', 'HOUSEKEEPING')),
+            password_hash        TEXT    NOT NULL,
+            active               INTEGER NOT NULL DEFAULT 1,
+            must_change_password INTEGER NOT NULL DEFAULT 0,
+            failed_attempts      INTEGER NOT NULL DEFAULT 0,
+            locked_until         TEXT,
+            created_at           TEXT    NOT NULL
+        )""",
+        """
         CREATE TABLE IF NOT EXISTS bills (
             id          INTEGER PRIMARY KEY AUTOINCREMENT,
             guest_name  TEXT    NOT NULL,

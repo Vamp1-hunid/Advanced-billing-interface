@@ -1,134 +1,40 @@
 package lodgebilling.view;
 
-import javafx.animation.FadeTransition;
-import javafx.animation.Interpolator;
-import javafx.animation.ParallelTransition;
-import javafx.animation.ScaleTransition;
-import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
+import javafx.beans.property.ObjectProperty;
+import lodgebilling.model.Theme;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
-import javafx.util.Duration;
-import lodgebilling.model.AuthService;
-import lodgebilling.model.BillingModel;
-import lodgebilling.model.Theme;
 
-/** The sign-in screen. Calls onSuccess once the username and password are accepted. */
-public class LoginView extends StackPane {
+/** The sign-in screen shown at start-up and after logging out. */
+public class LoginView extends AuthCard {
 
-    private static final Duration EXIT_TIME = Duration.millis(450);
-
-    private final TextField username = new TextField();
-    private final PasswordField password = new PasswordField();
-    private final Label error = new Label();
-    private ChangeListener<Theme> themeListener;
-    private AuroraBackground aurora;
-    private VBox card;
-    private ThemeToggle themeToggle;
-
-    public LoginView(AuthService auth, BillingModel model, Runnable onSuccess) {
-        Label title = new Label("Lodge Billing");
-        title.getStyleClass().add("app-title");
-
-        username.setPromptText("Username");
-        password.setPromptText("Password");
-
-        error.getStyleClass().addAll("status", "error");
-        error.setWrapText(true);
-        error.setMaxWidth(Double.MAX_VALUE);
-        error.setVisible(false);
-        error.setManaged(false);
-
-        Button signIn = new Button("Sign in");
-        signIn.setDefaultButton(true);
-        signIn.setMaxWidth(Double.MAX_VALUE);
-        signIn.setOnAction(e -> {
-            if (auth.login(username.getText(), password.getText().toCharArray())) {
-                password.clear();
-                hideError();
-                model.themeProperty().removeListener(themeListener);
-                playExit(onSuccess);
-            } else {
-                password.clear();
-                showError("Wrong username or password.");
-                password.requestFocus();
-            }
-        });
-        username.textProperty().addListener((obs, old, v) -> hideError());
-        password.textProperty().addListener((obs, old, v) -> hideError());
-
-        card = new VBox(12, title, username, password, error, signIn);
-        card.getStyleClass().add("card");
-        card.setAlignment(Pos.CENTER_LEFT);
-        card.setPadding(new Insets(28));
-        card.setMaxWidth(360);
-        card.setMaxHeight(USE_PREF_SIZE);
-
-        themeToggle = new ThemeToggle(model.themeProperty(), model::toggleTheme);
-        themeToggle.setFocusTraversable(false);
-        StackPane.setAlignment(themeToggle, Pos.TOP_RIGHT);
-
-        aurora = new AuroraBackground();
-        aurora.setManaged(false);
-        themeListener = (obs, old, theme) -> Styles.apply(theme, this);
-        Styles.apply(model.themeProperty().get(), this);
-        model.themeProperty().addListener(themeListener);
-
-        setPadding(new Insets(24));
-        getChildren().addAll(aurora, card, themeToggle);
+    /** Called with what was typed. The password array is wiped by the receiver. */
+    @FunctionalInterface
+    public interface Handler {
+        void signIn(String username, char[] password);
     }
 
-    /** The card shrinks and fades away; only then does the billing window open. */
-    private void playExit(Runnable next) {
-        card.setDisable(true);
-        themeToggle.setDisable(true);
+    private final TextField username;
+    private final PasswordField password;
 
-        FadeTransition cardFade = new FadeTransition(EXIT_TIME, card);
-        cardFade.setToValue(0);
-        ScaleTransition cardShrink = new ScaleTransition(EXIT_TIME, card);
-        cardShrink.setToX(0.9);
-        cardShrink.setToY(0.9);
-        FadeTransition toggleFade = new FadeTransition(EXIT_TIME, themeToggle);
-        toggleFade.setToValue(0);
-
-        ParallelTransition exit = new ParallelTransition(cardFade, cardShrink, toggleFade);
-        exit.setInterpolator(Interpolator.EASE_IN);
-        exit.setOnFinished(e -> {
-            aurora.stop();
-            next.run();
+    public LoginView(Handler handler, ObjectProperty<Theme> theme) {
+        super("Sign in", "Use the account your admin gave you.", theme);
+        username = field("Username", new TextField());
+        password = field("Password", new PasswordField());
+        Button signIn = new Button("Sign in");
+        signIn.setOnAction(e -> {
+            clearError();
+            char[] typed = password.getText().toCharArray();
+            password.clear();   // never leave a password sitting in the field
+            handler.signIn(username.getText(), typed);
         });
-        exit.play();
+        finish(signIn);
     }
 
     @Override
-    protected void layoutChildren() {
-        super.layoutChildren();
-        // the backdrop ignores the padding and fills the whole window
-        aurora.resizeRelocate(0, 0, getWidth(), getHeight());
-    }
-
-    /** Call once the scene exists. */
-    public void install(javafx.scene.Scene scene) {
-        scene.getStylesheets().add(Styles.stylesheet());
-        Motion.liftButtons(card);
-        Motion.enter(card, themeToggle);
-        Platform.runLater(username::requestFocus);
-    }
-
-    private void showError(String message) {
-        error.setText(message);
-        error.setVisible(true);
-        error.setManaged(true);
-    }
-
-    private void hideError() {
-        error.setVisible(false);
-        error.setManaged(false);
+    public void showError(String message) {
+        super.showError(message);
+        password.requestFocus();
     }
 }

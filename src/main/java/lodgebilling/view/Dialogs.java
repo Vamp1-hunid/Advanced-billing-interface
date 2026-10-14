@@ -120,7 +120,7 @@ public class Dialogs {
         confirm.setTitle("Confirm deletion");
         confirm.setHeaderText("Delete the selected receipt?");
 
-        // Make Cancel the safe default: Enter or a stray key press keeps the receipt
+        // Make Cancel the safe default: Enter or a stray key press keeps the bill
         Button deleteButton = (Button) confirm.getDialogPane().lookupButton(delete);
         Button cancelButton = (Button) confirm.getDialogPane().lookupButton(ButtonType.CANCEL);
         deleteButton.setDefaultButton(false);
@@ -135,8 +135,11 @@ public class Dialogs {
         Alert about = new Alert(Alert.AlertType.INFORMATION);
         about.setTitle("About");
         about.setHeaderText("Lodge Billing");
-        about.setContentText("Enter a guest, calculate the bill, save it as a receipt, then view or delete "
-                + "saved receipts from the table.");
+        about.setContentText("Enter a guest, calculate the bill, save it as a receipt, then view, print or "
+                + "delete saved receipts from the table. Receipts are kept in a database.\n\n"
+                + "Front desk: make and print receipts. Admin: can also delete receipts.\n\n"
+                + "Signed in as " + model.session().user().fullName()
+                + " (" + model.session().user().role().getLabel() + ").");
         show(about);
     }
 
