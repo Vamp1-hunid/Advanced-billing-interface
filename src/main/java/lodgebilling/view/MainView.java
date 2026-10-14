@@ -18,6 +18,7 @@ import lodgebilling.model.BillFormData;
 import lodgebilling.model.BillingModel;
 import lodgebilling.model.FormField;
 import lodgebilling.model.RateCard;
+import lodgebilling.service.AuthService;
 
 /**
  * The V in MVC: the whole window. It lays out the smaller views, shows what the
@@ -131,6 +132,7 @@ public class MainView extends BorderPane {
     public boolean printReceipt(Bill bill)  { return dialogs.printReceipt(bill); }
     public boolean confirmDelete(Bill bill) { return dialogs.confirmDelete(bill); }
     public void showAbout()                 { dialogs.showAbout(); }
+    public void manageUsers(AuthService auth) { dialogs.manageUsers(auth); }
     public boolean changePassword(boolean forced, ChangePasswordDialog.Change change) {
         return dialogs.changePassword(forced, change);
     }

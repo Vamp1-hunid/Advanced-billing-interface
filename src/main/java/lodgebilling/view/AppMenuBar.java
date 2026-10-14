@@ -14,7 +14,7 @@ import lodgebilling.security.Session;
 
 
 /**
- * The File, View and Help menus, with their keyboard shortcuts.
+ * The File, View, Admin and Help menus, with their keyboard shortcuts.
  * Items the user's role cannot use are left out entirely (so their shortcuts
  * do nothing either); the services still check permissions.
  */
@@ -47,6 +47,14 @@ public class AppMenuBar extends MenuBar {
         Menu view = new Menu("_View");
         view.getItems().add(themeItem);
         getMenus().addAll(file, view);
+
+        Menu admin = new Menu("_Admin");
+        if (session.has(Permission.MANAGE_USERS)) {
+            admin.getItems().add(item("Manage _users...", "Shortcut+U", actions::manageUsers));
+        }
+        if (!admin.getItems().isEmpty()) {
+            getMenus().add(admin);
+        }
 
         Menu help = new Menu("_Help");
         help.getItems().add(item("_About", null, actions::showAbout));

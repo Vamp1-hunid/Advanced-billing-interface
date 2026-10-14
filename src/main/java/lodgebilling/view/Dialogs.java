@@ -18,6 +18,7 @@ import lodgebilling.controller.BillingActions;
 import lodgebilling.model.Bill;
 import lodgebilling.model.BillingModel;
 import lodgebilling.model.Money;
+import lodgebilling.service.AuthService;
 
 import java.util.Optional;
 
@@ -136,13 +137,17 @@ public class Dialogs {
         return ChangePasswordDialog.show(owner, model.themeProperty().get(), forced, change);
     }
 
+    public void manageUsers(AuthService auth) {
+        new UserManagementDialog(owner, model.themeProperty().get(), auth, model.session()).showAndWait();
+    }
+
     public void showAbout() {
         Alert about = new Alert(Alert.AlertType.INFORMATION);
         about.setTitle("About");
         about.setHeaderText("Lodge Billing");
         about.setContentText("Enter a guest, calculate the bill, save it as a receipt, then view, print or "
                 + "delete saved receipts from the table. Receipts are kept in a database.\n\n"
-                + "Front desk: make and print receipts. Admin: can also delete receipts.\n\n"
+                + "Front desk: make and print receipts. Admin: also deletes receipts and manages users.\n\n"
                 + "Signed in as " + model.session().user().fullName()
                 + " (" + model.session().user().role().getLabel() + ").");
         show(about);

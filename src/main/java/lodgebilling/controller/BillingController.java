@@ -210,6 +210,15 @@ public class BillingController implements BillingActions {
     }
 
     @Override
+    public void manageUsers() {
+        if (!model.session().has(Permission.MANAGE_USERS)) {
+            model.setStatus(StatusMessage.error("Only an admin can manage users."));
+            return;
+        }
+        view.manageUsers(auth);
+    }
+
+    @Override
     public void logout() {
         auth.logout(model.session());
         onLogout.run();
