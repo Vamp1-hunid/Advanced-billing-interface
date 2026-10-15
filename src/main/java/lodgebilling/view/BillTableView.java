@@ -15,7 +15,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-/** The table of saved bills, bound directly to the repository's list. */
+/** The table of saved receipts, bound directly to the model's list. */
 public class BillTableView extends TableView<Bill> {
 
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm");
@@ -53,16 +53,15 @@ public class BillTableView extends TableView<Bill> {
         getColumns().add(moneyColumn("Paid", "paid"));
         getColumns().add(moneyColumn("Balance", "balance"));
 
+        TableColumn<Bill, String> byCol = new TableColumn<>("By");
+        byCol.setCellValueFactory(new PropertyValueFactory<>("createdBy"));
+        getColumns().add(byCol);
+
         setItems(bills);
         setPlaceholder(new Label("No receipts saved yet."));
         setFixedCellSize(44);
         setEditable(false);
-        getStyleClass().add("bill-table");
-        setStyle("-fx-background-color: white;"+
-                "-fx-border-color:#E2E8f0;"+
-                "-fx-border-radius: 8;"+
-                "-fx-background-radius: 8;"
-               );
+        getStyleClass().add("bill-table");   // colours live in lodge.css so dark mode works too
         // Columns share the full width in proportion to their preferred widths,
         // so the table fills its card with no empty strip and no scrollbar
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
@@ -71,8 +70,16 @@ public class BillTableView extends TableView<Bill> {
         guestCol.setPrefWidth(200);
         roomCol.setPrefWidth(110);
         nightsCol.setPrefWidth(70);
-        for (int i = 5; i < getColumns().size(); i++) {
+        for (int i = 5; i <= 7; i++) {   // the three money columns
             getColumns().get(i).setPrefWidth(110);
+        }
+        byCol.setPrefWidth(90);
+        // Floors so amounts like "K 2812.50" never turn into "K 28..." on a narrow window
+        idCol.setMinWidth(100);
+        dateCol.setMinWidth(165);
+        nightsCol.setMinWidth(55);
+        for (int i = 5; i <= 7; i++) {
+            getColumns().get(i).setMinWidth(95);
         }
         setMinHeight(160);
 
@@ -83,7 +90,8 @@ public class BillTableView extends TableView<Bill> {
             }
         });
 
-        // Enter open the selected receipt; Delete requests deletion
+        // Enter opens the selected receipt; Delete asks to delete it
+        // (Space is left alone: in a table it selects the row)
         setOnKeyPressed(e -> {
             if (selectedBill() == null) {
                 return;
@@ -91,10 +99,7 @@ public class BillTableView extends TableView<Bill> {
             if (e.getCode() == KeyCode.ENTER) {
                 onOpen.run();
                 e.consume();
-            } else if (e.getCode() == KeyCode.SPACE) {
-                onDelete.run();
-                e.consume();
-            }else if (e.getCode() == KeyCode.DELETE) {
+            } else if (e.getCode() == KeyCode.DELETE) {
                 onDelete.run();
                 e.consume();
             }

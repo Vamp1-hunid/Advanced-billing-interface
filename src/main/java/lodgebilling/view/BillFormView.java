@@ -50,6 +50,7 @@ public class BillFormView extends VBox {
 
         configureFields();
         calculateButton.setOnAction(e -> actions.calculate());
+        saveButton.setDefaultButton(true);         // Enter triggers Save receipt
         saveButton.setOnAction(e -> actions.saveBill());
 
         // Tell the controller about every edit, so it can drop an error the user is fixing
@@ -168,7 +169,7 @@ public class BillFormView extends VBox {
         ColumnConstraints labelCol = new ColumnConstraints(90);
         ColumnConstraints inputCol = new ColumnConstraints();
         inputCol.setHgrow(Priority.ALWAYS);
-        ColumnConstraints secondLabelCol = new ColumnConstraints(120);
+        ColumnConstraints secondLabelCol = new ColumnConstraints(140);
         ColumnConstraints secondInputCol = new ColumnConstraints();
         secondInputCol.setHgrow(Priority.ALWAYS);
         form.getColumnConstraints().addAll(labelCol, inputCol, secondLabelCol, secondInputCol);

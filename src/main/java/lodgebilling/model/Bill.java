@@ -16,28 +16,36 @@ public class Bill {
     private final String receiptNumber;
     private final String guestName;
     private final RoomType roomType;
+    private final BigDecimal nightlyRate;
     private final int nights;
     private final BigDecimal extras;
     private final BigDecimal paid;
     private final String notes;
-
     private final LocalDateTime issuedAt;
+    private final String createdBy;
 
     private final BigDecimal roomCharge;
     private final BigDecimal discount;
     private final BigDecimal total;
     private final BigDecimal balance;
 
-    /** A new bill, issued right now. */
+    /** An unsaved bill (a preview), issued now by nobody in particular. */
     public Bill(String receiptNumber, String guestName, RoomType roomType, int nights,
                 BigDecimal extras, BigDecimal paid, String notes) {
-        this(receiptNumber, guestName, roomType, nights, extras, paid, notes, LocalDateTime.now());
+        this(receiptNumber, guestName, roomType, roomType.getNightlyRate(), nights, extras, paid, notes,
+                LocalDateTime.now(), "");
     }
 
-    /** A bill with a given issue date, used when loading saved receipts. */
-    public Bill(String receiptNumber, String guestName, RoomType roomType, int nights,
-                BigDecimal extras, BigDecimal paid, String notes, LocalDateTime issuedAt) {
+    /**
+     * @param nightlyRate the price per night when the bill was made (copied, so a
+     *                    later price change does not alter an old bill)
+     */
+    public Bill(String receiptNumber, String guestName, RoomType roomType, BigDecimal nightlyRate, int nights,
+                BigDecimal extras, BigDecimal paid, String notes,
+                LocalDateTime issuedAt, String createdBy) {
+        this.nightlyRate = Money.scale(nightlyRate);
         this.issuedAt = issuedAt;
+        this.createdBy = createdBy;
         this.receiptNumber = receiptNumber;
         this.guestName = guestName;
         this.roomType = roomType;
@@ -47,7 +55,7 @@ public class Bill {
         this.notes = notes;
 
         // Room charge = price per night x nights
-        this.roomCharge = Money.scale(roomType.getNightlyRate().multiply(BigDecimal.valueOf(nights)));
+        this.roomCharge = Money.scale(this.nightlyRate.multiply(BigDecimal.valueOf(nights)));
 
         // 5 nights or more: 5% off the room charge (extras get no discount)
         this.discount = nights >= DISCOUNT_MIN_NIGHTS
@@ -59,21 +67,39 @@ public class Bill {
         this.balance = total.subtract(this.paid);
     }
 
-    /** Builds a bill from validated form values. Use an empty receipt number for an unsaved preview. */
+    /** Builds a bill from validated form values. Use an empty id for an unsaved preview. */
     public static Bill of(String receiptNumber, BillInput in) {
-        return new Bill(receiptNumber, in.name(), in.room(), in.nights(), in.extras(), in.paid(), in.notes());
+        return new Bill(receiptNumber, in.name(), in.room(), in.nightlyRate(), in.nights(), in.extras(), in.paid(),
+                in.notes(), LocalDateTime.now(), "");
     }
 
-    public String getReceiptNumber()    { return receiptNumber; }
-    public String getGuestName()        { return guestName; }
-    public RoomType getRoomType()       { return roomType; }
-    public int getNights()              { return nights; }
-    public BigDecimal getExtras()       { return extras; }
-    public BigDecimal getPaid()         { return paid; }
-    public String getNotes()            { return notes; }
-    public LocalDateTime getIssuedAt()  { return issuedAt; }
-    public BigDecimal getRoomCharge()   { return roomCharge; }
-    public BigDecimal getDiscount()     { return discount; }
-    public BigDecimal getTotal()        { return total; }
-    public BigDecimal getBalance()      { return balance; }
+    /** Receipt number 7 is shown as "R007". */
+    public static String idFor(long number) {
+        return String.format("R%03d", number);
+    }
+
+    /** "R007" back to 7. */
+    public static long numberOf(String receiptNumber) {
+        return Long.parseLong(receiptNumber.substring(1));
+    }
+
+    /** "5%", built from DISCOUNT_RATE so the screen can never disagree with the maths. */
+    public static String discountPercentLabel() {
+        return DISCOUNT_RATE.movePointRight(2).stripTrailingZeros().toPlainString() + "%";
+    }
+
+    public String getReceiptNumber()         { return receiptNumber; }
+    public String getGuestName()      { return guestName; }
+    public RoomType getRoomType()     { return roomType; }
+    public BigDecimal getNightlyRate() { return nightlyRate; }
+    public int getNights()            { return nights; }
+    public BigDecimal getExtras()     { return extras; }
+    public BigDecimal getPaid()       { return paid; }
+    public String getNotes()          { return notes; }
+    public LocalDateTime getIssuedAt() { return issuedAt; }
+    public String getCreatedBy()      { return createdBy; }
+    public BigDecimal getRoomCharge() { return roomCharge; }
+    public BigDecimal getDiscount()   { return discount; }
+    public BigDecimal getTotal()      { return total; }
+    public BigDecimal getBalance()    { return balance; }
 }

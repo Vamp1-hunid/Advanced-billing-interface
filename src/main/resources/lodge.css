@@ -372,3 +372,28 @@
 .receipt-paper .label.receipt-stamp-due { -fx-text-fill: #b03030; -fx-border-color: #b03030; }
 .main-scroll, .main-scroll > .viewport { -fx-background-color: transparent; -fx-background: transparent; }
 .receipt-scroll, .receipt-scroll > .viewport { -fx-background-color: transparent; -fx-background: transparent; }
+
+/* =====================================================================
+   Sign-in and first-run cards, and who is signed in (header badge).
+   They use the same palette names as above.
+   ===================================================================== */
+.app-subtitle { -fx-font-size: 13px; -fx-text-fill: -text-muted; }
+.app-stars { -fx-font-size: 13px; -fx-text-fill: -accent; -fx-letter-spacing: 2; }
+.button:default:focused { -fx-border-color: -accent; }
+.menu-item { -fx-background-radius: 6; }
+.bill-table { -fx-background-radius: 8; -fx-border-radius: 8; }
+
+/* ---------- Sign-in and first-run screens ---------- */
+.auth-card { -fx-spacing: 10; }   /* keeps the frosted .card look; padding is set in code */
+.auth-card .app-title { -fx-font-size: 28px; }
+.auth-card .form-label { -fx-padding: 6 0 0 0; -fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: -text-muted; }
+.user-badge { -fx-font-size: 13px; -fx-text-fill: -text-muted; }
+.user-badge-role {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+    -fx-background-color: -accent;
+    -fx-background-radius: 12;
+    -fx-padding: 3 12 3 12;
+}
+.root.dark .user-badge-role { -fx-text-fill: #04121f; }

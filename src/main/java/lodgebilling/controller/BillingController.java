@@ -1,7 +1,6 @@
 package lodgebilling.controller;
 
 import javafx.stage.Stage;
-import lodgebilling.BillDao;
 import lodgebilling.model.Bill;
 import lodgebilling.model.BillInput;
 import lodgebilling.model.BillValidator;
@@ -9,10 +8,18 @@ import lodgebilling.model.BillingModel;
 import lodgebilling.model.FormField;
 import lodgebilling.model.Money;
 import lodgebilling.model.StatusMessage;
+import lodgebilling.model.Theme;
 import lodgebilling.model.ValidationException;
 import lodgebilling.view.MainView;
+import lodgebilling.data.AuditLog;
+import lodgebilling.data.DataException;
+import lodgebilling.security.AccessDeniedException;
+import lodgebilling.security.Permission;
+import lodgebilling.service.AuthService;
 
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * The C in MVC: turns what the user does into changes to the model.
@@ -23,22 +30,36 @@ import java.util.Optional;
 public class BillingController implements BillingActions {
 
     private final BillingModel model;
-    private final BillDao dao;
+    private static final Logger LOG = Logger.getLogger(BillingController.class.getName());
+    private static final int AUDIT_ROWS_SHOWN = 500;
+
     private final BillValidator validator = new BillValidator();
     private final Stage stage;
     private final MainView view;
+    private final AuthService auth;
+    private final AuditLog audit;
     private final Runnable onLogout;
 
-    public BillingController(BillingModel model, BillDao dao, Stage stage, Runnable onLogout) {
+    /**
+     * @param onLogout called after the user logs out, to show the sign-in screen again
+     */
+    public BillingController(BillingModel model, Stage stage, AuthService auth, AuditLog audit,
+                             Runnable onLogout) {
         this.model = model;
-        this.dao = dao;
         this.stage = stage;
+        this.auth = auth;
+        this.audit = audit;
         this.onLogout = onLogout;
-        this.view = new MainView(model, dao.findAll(), this, stage);
+        this.view = new MainView(model, this, stage);
     }
 
     public MainView view() {
         return view;
+    }
+
+    /** The colour scheme in use, so it can carry over to the next sign-in. */
+    public Theme theme() {
+        return model.themeProperty().get();
     }
 
     /**
@@ -74,15 +95,25 @@ public class BillingController implements BillingActions {
         }
         BillInput input = read.get();
 
-        Bill existing = dao.findByGuest(input.name());
-        if (existing != null) {
-            model.setStatus(StatusMessage.error("A receipt for " + existing.getGuestName()
-                    + " is already saved as " + existing.getReceiptNumber() + ".", FormField.NAME));
+        if (model.isRepeatOfLastSave(input)) {
+            model.setStatus(StatusMessage.error("This receipt is already saved as "
+                    + model.lastSavedReceiptNumber()
+                    + ". Change the details, or click New guest for the next guest."));
             view.focusField(FormField.NAME);
             return;
         }
 
-        Bill bill = dao.save(input);
+        Bill bill;
+        try {
+            bill = model.save(input);
+        } catch (AccessDeniedException e) {
+            model.setStatus(StatusMessage.error(e.getMessage()));
+            return;
+        } catch (DataException e) {
+            LOG.log(Level.SEVERE, "Saving a bill failed", e);
+            model.setStatus(StatusMessage.error("Could not save the receipt: " + e.getMessage()));
+            return;
+        }
         view.clearForm();
         model.setStatus(StatusMessage.success(
                 "Saved " + bill.getReceiptNumber() + ". Balance: " + Money.format(bill.getBalance())));
@@ -91,6 +122,7 @@ public class BillingController implements BillingActions {
 
     @Override
     public void newGuest() {
+        model.forgetLastSaved();
         view.clearForm();
         view.clearSelection();
         model.setStatus(StatusMessage.info("Ready for a new guest."));
@@ -136,11 +168,25 @@ public class BillingController implements BillingActions {
             return;
         }
 
+        // Checked before asking, so staff are not shown a confirmation they cannot act on
+        if (!model.session().has(Permission.DELETE_BILL)) {
+            model.setStatus(StatusMessage.error("Only an admin can delete receipts."));
+            return;
+        }
         if (!view.confirmDelete(selected)) {
             model.setStatus(StatusMessage.info("Deletion cancelled."));
             return;
         }
-        dao.delete(selected);
+        try {
+            model.delete(selected);
+        } catch (AccessDeniedException e) {
+            model.setStatus(StatusMessage.error(e.getMessage()));
+            return;
+        } catch (DataException e) {
+            LOG.log(Level.SEVERE, "Deleting a bill failed", e);
+            model.setStatus(StatusMessage.error("Could not delete the receipt: " + e.getMessage()));
+            return;
+        }
         view.clearSelection();
         model.setStatus(StatusMessage.success("Receipt " + selected.getReceiptNumber() + " deleted."));
     }
@@ -156,8 +202,40 @@ public class BillingController implements BillingActions {
     }
 
     @Override
+    public void changePassword() {
+        boolean changed = view.changePassword(false,
+                (current, replacement) -> auth.changeOwnPassword(model.session(), current, replacement));
+        if (changed) {
+            model.setStatus(StatusMessage.success("Your password has been changed."));
+        }
+    }
+
+    @Override
+    public void manageUsers() {
+        if (!model.session().has(Permission.MANAGE_USERS)) {
+            model.setStatus(StatusMessage.error("Only an admin can manage users."));
+            return;
+        }
+        view.manageUsers(auth);
+    }
+
+    @Override
+    public void showAuditLog() {
+        if (!model.session().has(Permission.VIEW_AUDIT_LOG)) {
+            model.setStatus(StatusMessage.error("Only an admin can read the audit log."));
+            return;
+        }
+        try {
+            view.showAuditLog(audit.latest(AUDIT_ROWS_SHOWN));
+        } catch (DataException e) {
+            LOG.log(Level.SEVERE, "Reading the audit log failed", e);
+            model.setStatus(StatusMessage.error("Could not read the audit log: " + e.getMessage()));
+        }
+    }
+
+    @Override
     public void logout() {
-        view.stopBackground();
+        auth.logout(model.session());
         onLogout.run();
     }
 
