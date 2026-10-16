@@ -11,6 +11,7 @@ public enum Permission {
     DELETE_BILL,
 
     // Front desk
+    VIEW_DASHBOARD,
     MANAGE_RESERVATIONS,   // book, edit, cancel, check in, check out (with zero balance)
     POST_FOLIO,            // add charges and record payments on a guest folio
     VOID_FOLIO_ENTRY,      // cancel a charge or payment posted by mistake
@@ -21,6 +22,7 @@ public enum Permission {
     MANAGE_ROOMS,          // add rooms, change rates and VAT
 
     // Admin
+    VIEW_REPORTS,
     MANAGE_USERS,
     VIEW_AUDIT_LOG
 }

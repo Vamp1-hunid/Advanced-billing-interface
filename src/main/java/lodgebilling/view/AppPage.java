@@ -4,10 +4,12 @@ import lodgebilling.security.Permission;
 
 /** The screens in the sidebar, in order, with who may see each one. */
 public enum AppPage {
+    DASHBOARD("Dashboard", Permission.VIEW_DASHBOARD),
     TAPE_CHART("Tape chart", Permission.MANAGE_RESERVATIONS),
     STAYS("Stays & folios", Permission.MANAGE_RESERVATIONS),
     QUICK_BILLS("Receipts", Permission.CREATE_BILL),
-    ROOMS("Rooms", Permission.UPDATE_ROOM_STATUS);
+    ROOMS("Rooms", Permission.UPDATE_ROOM_STATUS),
+    REPORTS("Reports", Permission.VIEW_REPORTS);
 
     private final String label;
     private final Permission permission;

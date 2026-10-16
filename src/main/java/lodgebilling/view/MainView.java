@@ -25,8 +25,10 @@ import lodgebilling.model.FormField;
 import lodgebilling.security.Permission;
 import lodgebilling.service.AuthService;
 import lodgebilling.service.LodgeService;
+import lodgebilling.view.pages.DashboardPage;
 import lodgebilling.view.pages.Page;
 import lodgebilling.view.pages.PageContext;
+import lodgebilling.view.pages.ReportsPage;
 import lodgebilling.view.pages.ReservationDialog;
 import lodgebilling.view.pages.RoomsPage;
 import lodgebilling.view.pages.StaysPage;
@@ -114,9 +116,11 @@ public class MainView extends BorderPane {
 
     private Page createPage(AppPage p) {
         return switch (p) {
+            case DASHBOARD -> new DashboardPage(pageContext);
             case TAPE_CHART -> new TapeChartPage(pageContext);
             case STAYS -> new StaysPage(pageContext);
             case ROOMS -> new RoomsPage(pageContext);
+            case REPORTS -> new ReportsPage(pageContext);
             case QUICK_BILLS -> new Page() {
                 private final VBox node = new VBox(toolBar, billingScroll);
                 { VBox.setVgrow(billingScroll, Priority.ALWAYS); }

@@ -152,9 +152,9 @@ public class Dialogs {
         about.setTitle("About");
         about.setHeaderText("Lodge Billing");
         about.setContentText("Lodge Billing runs the front desk: bookings and walk-ins, the tape chart, guest folios "
-                + "with split bills and VAT, room housekeeping and walk-in receipts.\n\n"
+                + "with split bills and VAT, room housekeeping, walk-in receipts and reports.\n\n"
                 + "Housekeeping: room status only. Front desk: bookings, folios, receipts. "
-                + "Admin: also voids, forced check-out, prices, users and the audit log.\n\n"
+                + "Admin: also voids, forced check-out, prices, reports, users and the audit log.\n\n"
                 + "Signed in as " + model.session().user().fullName()
                 + " (" + model.session().user().role().getLabel() + ").");
         show(about);

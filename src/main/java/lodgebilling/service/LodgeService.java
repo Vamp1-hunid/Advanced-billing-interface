@@ -4,10 +4,13 @@ import lodgebilling.data.AuditLog;
 import lodgebilling.data.AuditLog.Action;
 import lodgebilling.data.Database;
 import lodgebilling.data.FolioRepository;
+import lodgebilling.data.ReportRepository;
+import lodgebilling.data.ReportRepository.DailyStat;
 import lodgebilling.data.ReservationRepository;
 import lodgebilling.data.RoomRepository;
 import lodgebilling.data.SettingsRepository;
 import lodgebilling.model.ChargeCategory;
+import lodgebilling.model.DashboardData;
 import lodgebilling.model.FolioCalculator;
 import lodgebilling.model.FolioEntry;
 import lodgebilling.model.FolioSummary;
@@ -57,6 +60,7 @@ public class LodgeService {
     private final ReservationRepository reservations;
     private final FolioRepository folios;
     private final SettingsRepository settings;
+    private final ReportRepository reports;
     private final AuditLog audit;
     private final Clock clock;
     private final RateCard rateCard;
@@ -67,6 +71,7 @@ public class LodgeService {
         this.reservations = new ReservationRepository(database);
         this.folios = new FolioRepository(database);
         this.settings = new SettingsRepository(database);
+        this.reports = new ReportRepository(database);
         this.audit = audit;
         this.clock = clock;
         seedIfEmpty();
@@ -452,6 +457,77 @@ public class LodgeService {
         folios.voidEntry(entry.id(), why);
         audit.record(session.username(), Action.ENTRY_VOIDED, "BK" + String.format("%04d", entry.reservationId())
                 + " " + entry.kind() + " " + Money.format(entry.amount()) + ": " + why);
+    }
+
+    // =====================================================================
+    // Dashboard and reports
+    // =====================================================================
+
+    public DashboardData dashboard(Session session) {
+        session.require(Permission.VIEW_DASHBOARD);
+        LocalDate today = today();
+        List<Reservation> arrivals = new ArrayList<>();
+        List<Reservation> departures = new ArrayList<>();
+        int inHouse = 0;
+        BigDecimal outstanding = BigDecimal.ZERO;
+        Map<Long, List<FolioEntry>> allEntries = folios.findAllGrouped();
+        for (Reservation r : reservations.findAll()) {
+            if (r.status() == ReservationStatus.BOOKED && !r.checkIn().isAfter(today)) {
+                arrivals.add(r);
+            }
+            if (r.status() == ReservationStatus.CHECKED_IN) {
+                inHouse++;
+                if (!r.checkOut().isAfter(today)) {
+                    departures.add(r);
+                }
+            }
+            if (r.status() == ReservationStatus.CHECKED_IN || r.status() == ReservationStatus.CHECKED_OUT) {
+                BigDecimal bal = FolioCalculator.summarise(r, allEntries.getOrDefault(r.id(), List.of())).balance();
+                if (bal.signum() > 0) {
+                    outstanding = outstanding.add(bal);
+                }
+            }
+        }
+        Map<RoomStatus, Integer> byStatus = new EnumMap<>(RoomStatus.class);
+        List<Room> all = rooms.findAll();
+        for (RoomStatus s : RoomStatus.values()) byStatus.put(s, 0);
+        for (Room room : all) byStatus.merge(room.status(), 1, Integer::sum);
+        BigDecimal paidToday = reports.daily(today, today).get(0).paymentsReceived();
+        return new DashboardData(arrivals, departures, inHouse, all.size(), byStatus, outstanding, paidToday);
+    }
+
+    public List<DailyStat> dailyReport(Session session, LocalDate from, LocalDate to) throws LodgeException {
+        session.require(Permission.VIEW_REPORTS);
+        if (from == null || to == null || to.isBefore(from)) {
+            throw new LodgeException("Choose a start date on or before the end date.");
+        }
+        if (from.plusDays(366).isBefore(to)) {
+            throw new LodgeException("Choose a range of at most one year.");
+        }
+        return reports.daily(from, to);
+    }
+
+    /** Stays that still owe money (in house or already gone), largest debt first. */
+    public List<Folio> outstanding(Session session) {
+        session.require(Permission.VIEW_REPORTS);
+        Map<Long, List<FolioEntry>> allEntries = folios.findAllGrouped();
+        List<Folio> owing = new ArrayList<>();
+        for (Reservation r : reservations.findAll()) {
+            if (r.status() == ReservationStatus.CHECKED_IN || r.status() == ReservationStatus.CHECKED_OUT) {
+                List<FolioEntry> entries = allEntries.getOrDefault(r.id(), List.of());
+                FolioSummary s = FolioCalculator.summarise(r, entries);
+                if (s.balance().signum() > 0) {
+                    owing.add(new Folio(r, entries, s));
+                }
+            }
+        }
+        owing.sort((a, b) -> b.summary().balance().compareTo(a.summary().balance()));
+        return owing;
+    }
+
+    public void recordExport(Session session, String what) {
+        session.require(Permission.VIEW_REPORTS);
+        audit.record(session.username(), Action.REPORT_EXPORTED, what);
     }
 
     // =====================================================================

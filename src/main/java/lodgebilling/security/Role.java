@@ -11,7 +11,7 @@ public enum Role {
     /** Front desk: bookings, check-in/out, folios and receipts, but no voids, deletes or settings. */
     STAFF("Front desk", EnumSet.of(
             Permission.CREATE_BILL, Permission.PRINT_RECEIPT,
-            Permission.MANAGE_RESERVATIONS, Permission.POST_FOLIO,
+            Permission.VIEW_DASHBOARD, Permission.MANAGE_RESERVATIONS, Permission.POST_FOLIO,
             Permission.UPDATE_ROOM_STATUS)),
 
     /** General manager: everything. */
