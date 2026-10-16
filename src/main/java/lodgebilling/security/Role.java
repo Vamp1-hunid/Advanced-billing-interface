@@ -5,8 +5,14 @@ import java.util.Set;
 
 /** What kind of account a user has. Each role maps to a fixed set of permissions. */
 public enum Role {
-    /** Front desk: make and print receipts, but no deletes or user management. */
-    STAFF("Front desk", EnumSet.of(Permission.CREATE_BILL, Permission.PRINT_RECEIPT)),
+    /** Cleaners: see the rooms and mark them clean, dirty or under maintenance. Nothing financial. */
+    HOUSEKEEPING("Housekeeping", EnumSet.of(Permission.UPDATE_ROOM_STATUS)),
+
+    /** Front desk: bookings, check-in/out, folios and receipts, but no voids, deletes or settings. */
+    STAFF("Front desk", EnumSet.of(
+            Permission.CREATE_BILL, Permission.PRINT_RECEIPT,
+            Permission.MANAGE_RESERVATIONS, Permission.POST_FOLIO,
+            Permission.UPDATE_ROOM_STATUS)),
 
     /** General manager: everything. */
     ADMIN("Admin", EnumSet.allOf(Permission.class));

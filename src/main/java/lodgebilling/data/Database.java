@@ -54,7 +54,65 @@ public final class Database implements AutoCloseable {
             action    TEXT NOT NULL,
             details   TEXT NOT NULL DEFAULT ''
         )""",
-        "CREATE INDEX IF NOT EXISTS idx_audit_at ON audit_log(at)"
+        "CREATE INDEX IF NOT EXISTS idx_audit_at ON audit_log(at)",
+        """
+        CREATE TABLE IF NOT EXISTS settings (
+            key    TEXT PRIMARY KEY,
+            value  TEXT NOT NULL
+        )""",
+        // Current price per night of each room type. Bookings and bills copy the
+        // price at the time, so changing a rate never rewrites old bills.
+        """
+        CREATE TABLE IF NOT EXISTS room_rates (
+            room_type     TEXT PRIMARY KEY CHECK (room_type IN ('STANDARD', 'DELUXE', 'FAMILY')),
+            nightly_rate  TEXT NOT NULL
+        )""",
+        """
+        CREATE TABLE IF NOT EXISTS rooms (
+            id         INTEGER PRIMARY KEY AUTOINCREMENT,
+            number     TEXT    NOT NULL UNIQUE,
+            room_type  TEXT    NOT NULL CHECK (room_type IN ('STANDARD', 'DELUXE', 'FAMILY')),
+            status     TEXT    NOT NULL DEFAULT 'AVAILABLE'
+                       CHECK (status IN ('AVAILABLE', 'OCCUPIED', 'DIRTY', 'MAINTENANCE'))
+        )""",
+        // check_out is the morning the guest leaves, so nights = check_out - check_in
+        """
+        CREATE TABLE IF NOT EXISTS reservations (
+            id                 INTEGER PRIMARY KEY AUTOINCREMENT,
+            guest_name         TEXT    NOT NULL,
+            guest_phone        TEXT    NOT NULL DEFAULT '',
+            company            TEXT    NOT NULL DEFAULT '',
+            company_pays_room  INTEGER NOT NULL DEFAULT 0,
+            room_id            INTEGER NOT NULL REFERENCES rooms(id),
+            check_in           TEXT    NOT NULL,
+            check_out          TEXT    NOT NULL,
+            status             TEXT    NOT NULL DEFAULT 'BOOKED'
+                               CHECK (status IN ('BOOKED', 'CHECKED_IN', 'CHECKED_OUT', 'CANCELLED')),
+            nightly_rate       TEXT    NOT NULL,
+            vat_percent        TEXT    NOT NULL,
+            notes              TEXT    NOT NULL DEFAULT '',
+            created_by         TEXT    NOT NULL,
+            created_at         TEXT    NOT NULL,
+            CHECK (check_out > check_in)
+        )""",
+        "CREATE INDEX IF NOT EXISTS idx_res_room_dates ON reservations(room_id, check_in, check_out)",
+        // One line on a guest's bill: a charge (bar, laundry...) or a payment.
+        // Entries are never deleted; a mistake is voided, so the history stays.
+        """
+        CREATE TABLE IF NOT EXISTS folio_entries (
+            id              INTEGER PRIMARY KEY AUTOINCREMENT,
+            reservation_id  INTEGER NOT NULL REFERENCES reservations(id),
+            kind            TEXT    NOT NULL CHECK (kind IN ('CHARGE', 'PAYMENT', 'REFUND')),
+            category        TEXT    NOT NULL,
+            description     TEXT    NOT NULL DEFAULT '',
+            amount          TEXT    NOT NULL,
+            payer           TEXT    NOT NULL CHECK (payer IN ('GUEST', 'COMPANY')),
+            posted_at       TEXT    NOT NULL,
+            posted_by       TEXT    NOT NULL,
+            voided          INTEGER NOT NULL DEFAULT 0,
+            void_reason     TEXT    NOT NULL DEFAULT ''
+        )""",
+        "CREATE INDEX IF NOT EXISTS idx_folio_res ON folio_entries(reservation_id)"
     };
 
     private final Connection connection;

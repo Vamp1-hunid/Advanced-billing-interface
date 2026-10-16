@@ -374,9 +374,24 @@
 .receipt-scroll, .receipt-scroll > .viewport { -fx-background-color: transparent; -fx-background: transparent; }
 
 /* =====================================================================
-   Sign-in and first-run cards, and who is signed in (header badge).
-   They use the same palette names as above.
+   Screens added with the database and front-desk work (sign-in/setup
+   cards, user badge, sidebar, tape chart, rooms, folio).
+   They use the same palette names as above, plus a few of their own
+   defined here for both themes so they sit well on the aurora.
    ===================================================================== */
+.root {
+    /* the sidebar is a strip of smoked glass over the aurora */
+    -rail-bg: rgba(8,18,42,0.72);
+    -rail-text: #e6f0ff;
+    -rail-muted: #9fb3d9;
+    -rail-hover: rgba(255,255,255,0.10);
+}
+.root.dark {
+    -rail-bg: rgba(3,8,20,0.78);
+    -rail-text: #d6fff1;
+    -rail-muted: #7f9cc0;
+    -rail-hover: rgba(120,255,210,0.10);
+}
 .app-subtitle { -fx-font-size: 13px; -fx-text-fill: -text-muted; }
 .app-stars { -fx-font-size: 13px; -fx-text-fill: -accent; -fx-letter-spacing: 2; }
 .button:default:focused { -fx-border-color: -accent; }
@@ -397,3 +412,169 @@
     -fx-padding: 3 12 3 12;
 }
 .root.dark .user-badge-role { -fx-text-fill: #04121f; }
+
+/* =====================================================================
+   Front desk screens
+   Semantic colours, the same in both themes so staff learn them once:
+   green = available / paid, red = occupied / owing, amber = dirty / pending,
+   grey = maintenance / finished, violet = booked.
+   ===================================================================== */
+.root {
+    -ok: #1f8a4c;      -ok-soft: #e2f4e9;
+    -busy: #cf3b33;    -busy-soft: #fde6e4;
+    -pending: #c27c0e; -pending-soft: #fdf0d6;
+    -idle: #5f6b70;    -idle-soft: #e9eef0;
+    -booked: #6a4fc9;  -booked-soft: #ece7fb;
+}
+.root.dark {
+    -ok-soft: rgba(31,138,76,0.35);
+    -busy-soft: rgba(207,59,51,0.35);
+    -pending-soft: rgba(194,124,14,0.38);
+    -idle-soft: rgba(255,255,255,0.08);
+    -booked-soft: rgba(106,79,201,0.42);
+}
+
+/* ---------- Sidebar: smoked glass rail ---------- */
+.sidebar {
+    -fx-background-color: -rail-bg;
+    -fx-border-width: 0;
+    -fx-padding: 18 12 18 12;
+    -fx-pref-width: 220;
+    -fx-min-width: 196;
+}
+.sidebar .label { -fx-text-fill: -rail-text; }
+.side-label { -fx-text-fill: -rail-muted; -fx-font-size: 11px; -fx-font-weight: bold; -fx-padding: 16 6 4 6; }
+.sidebar .side-label { -fx-text-fill: -rail-muted; }
+.nav-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 10;
+    -fx-border-width: 0;
+    -fx-alignment: CENTER-LEFT;
+    -fx-padding: 10 14 10 14;
+    -fx-text-fill: -rail-text;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+}
+.nav-button:hover { -fx-background-color: -rail-hover; }
+.nav-button:selected {
+    -fx-background-color: -accent;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+.root.dark .nav-button:selected { -fx-text-fill: #04121f; }
+.nav-button:focused { -fx-border-color: -rail-muted; -fx-border-width: 1; -fx-border-radius: 10; }
+.quick-action {
+    -fx-min-width: 0;
+    -fx-padding: 9 12 9 12;
+    -fx-min-height: 38px;
+    -fx-background-color: rgba(255,255,255,0.08);
+    -fx-border-color: rgba(255,255,255,0.18);
+    -fx-text-fill: -rail-text;
+}
+.quick-action:hover { -fx-background-color: rgba(255,255,255,0.14); -fx-border-color: -rail-text; }
+.quick-action:first-child {
+    -fx-background-color: linear-gradient(to bottom, -primary-top, -primary-bottom);
+    -fx-border-color: transparent;
+    -fx-text-fill: -primary-text;
+    -fx-font-weight: bold;
+}
+
+/* ---------- Status chips ---------- */
+.chip {
+    -fx-padding: 3 12 3 12;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-border-width: 0;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+.label.status-available, .label.stay-checked-out   { -fx-background-color: -ok-soft;      -fx-border-color: -ok;      -fx-text-fill: -ok; }
+.label.status-occupied,  .label.stay-checked-in    { -fx-background-color: -busy-soft;    -fx-border-color: -busy;    -fx-text-fill: -busy; }
+.label.status-dirty                                { -fx-background-color: -pending-soft; -fx-border-color: -pending; -fx-text-fill: -pending; }
+.label.status-maintenance, .label.stay-cancelled   { -fx-background-color: -idle-soft;    -fx-border-color: -idle;    -fx-text-fill: -idle; }
+.label.stay-booked                                 { -fx-background-color: -booked-soft;  -fx-border-color: -booked;  -fx-text-fill: -booked; }
+.label.stay-owing                                  { -fx-background-color: -busy;         -fx-border-color: -busy;    -fx-text-fill: white; }
+.root.dark .label.status-available, .root.dark .label.stay-checked-out,
+.root.dark .label.status-occupied, .root.dark .label.stay-checked-in,
+.root.dark .label.status-dirty, .root.dark .label.status-maintenance,
+.root.dark .label.stay-cancelled, .root.dark .label.stay-booked { -fx-text-fill: white; }
+
+/* ---------- Tape chart ---------- */
+.tape { -fx-background-color: -table-bg; -fx-border-color: -glass-border; }
+.tape-head {
+    -fx-background-color: -th-bg;
+    -fx-text-fill: -text-muted;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+    -fx-padding: 6 4 6 8;
+    -fx-border-color: transparent -divider -glass-border transparent;
+    -fx-border-width: 0 1 1 0;
+}
+.tape-head.tape-today { -fx-background-color: -accent; -fx-text-fill: white; }
+.tape-room-cell {
+    -fx-padding: 6 8 6 8;
+    -fx-border-color: transparent -divider -divider transparent;
+    -fx-border-width: 0 1 1 0;
+    -fx-min-height: 52;
+}
+.tape-room { -fx-font-weight: bold; -fx-text-fill: -title; }
+.tape-cell {
+    -fx-min-height: 52;
+    -fx-border-color: transparent -divider -divider transparent;
+    -fx-border-width: 0 1 1 0;
+}
+.tape-weekend { -fx-background-color: -row-alt; }
+.tape-cell.tape-today { -fx-background-color: rgba(19,181,142,0.10); }
+.root.dark .tape-cell.tape-today { -fx-background-color: rgba(120,255,210,0.10); }
+.tape-free { -fx-cursor: hand; }
+.tape-free:hover { -fx-background-color: -row-hover; }
+.tape-bar {
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-border-width: 0 0 0 4;
+    -fx-padding: 0 8 0 8;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+.tape-bar:hover { -fx-effect: dropshadow(gaussian, -btn-shadow, 8, 0, 0, 2); }
+
+/* ---------- Room tiles ---------- */
+.room-tile {
+    -fx-background-radius: 14;
+    -fx-border-radius: 14;
+    -fx-border-width: 6 0 0 0;
+    -fx-padding: 14;
+    -fx-alignment: TOP-LEFT;
+    -fx-cursor: hand;
+}
+.tile-available   { -fx-background-color: -ok-soft;      -fx-border-color: -ok; }
+.tile-occupied    { -fx-background-color: -busy-soft;    -fx-border-color: -busy; }
+.tile-dirty       { -fx-background-color: -pending-soft; -fx-border-color: -pending; }
+.tile-maintenance { -fx-background-color: -idle-soft;    -fx-border-color: -idle; }
+.room-tile:selected { -fx-effect: dropshadow(gaussian, -primary-top, 14, 0.45, 0, 0); }
+.room-tile:focused  { -fx-effect: dropshadow(gaussian, -primary-top, 8, 0.25, 0, 0); }
+.tile-number { -fx-font-family: "Segoe UI Semibold", "Segoe UI", sans-serif; -fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: -title; }
+.tile-type { -fx-font-size: 12px; -fx-text-fill: -text-muted; }
+
+/* ---------- Folio ---------- */
+.folio-guest { -fx-font-family: "Segoe UI Semibold", "Segoe UI", sans-serif; -fx-font-size: 22px; -fx-text-fill: -title; }
+.sticky-footer {
+    -fx-background-color: -bar-bg;
+    -fx-border-color: -glass-border transparent transparent transparent;
+    -fx-border-width: 1 0 0 0;
+    -fx-padding: 12 20 12 20;
+    -fx-effect: dropshadow(gaussian, -shadow, 12, 0, 0, -2);
+}
+.balance-due { -fx-font-size: 22px; -fx-font-weight: bold; }
+.balance-due.owing { -fx-text-fill: -busy; }
+.balance-due.settled { -fx-text-fill: -ok; }
+.root.dark .balance-due.owing { -fx-text-fill: #ff9a90; }
+.root.dark .balance-due.settled { -fx-text-fill: #9ff0bf; }
+.table-row-cell.voided .table-cell { -fx-strikethrough: true; -fx-text-fill: -text-muted; -fx-opacity: 0.7; }
+.split-grid { -fx-padding: 10 0 0 0; }
+.button.compact { -fx-min-width: 0; -fx-padding: 9 16 9 16; -fx-min-height: 40px; }
+
+/* The frosted layer under each page of the main window */
+.page-area { -fx-background-color: rgba(240,246,255,0.55); }
+.root.dark .page-area { -fx-background-color: rgba(4,10,26,0.50); }

@@ -12,15 +12,17 @@ import lodgebilling.model.Theme;
 import lodgebilling.security.Permission;
 import lodgebilling.security.Session;
 
+import java.util.List;
+import java.util.function.Consumer;
 
 /**
- * The File, View, Admin and Help menus, with their keyboard shortcuts.
+ * The File, Go, View, Admin and Help menus, with their keyboard shortcuts.
  * Items the user's role cannot use are left out entirely (so their shortcuts
  * do nothing either); the services still check permissions.
  */
 public class AppMenuBar extends MenuBar {
 
-    public AppMenuBar(BillingActions actions, BillingModel model) {
+    public AppMenuBar(BillingActions actions, BillingModel model, List<AppPage> pages, Consumer<AppPage> go) {
         Session session = model.session();
 
         Menu file = new Menu("_File");
@@ -41,12 +43,19 @@ public class AppMenuBar extends MenuBar {
                 item("_Log out", "Shortcut+L", actions::logout),
                 item("_Close", "Shortcut+Q", actions::exit));
 
+        // Ctrl+1, Ctrl+2... jump between pages without the mouse
+        Menu goMenu = new Menu("_Go");
+        for (int i = 0; i < pages.size(); i++) {
+            AppPage p = pages.get(i);
+            goMenu.getItems().add(item(p.label(), "Shortcut+" + (i + 1), () -> go.accept(p)));
+        }
+
         MenuItem themeItem = item("", "Shortcut+T", actions::toggleTheme);
         themeItem.textProperty().bind(Bindings.when(model.themeProperty().isEqualTo(Theme.LIGHT))
                 .then("Switch to _dark mode").otherwise("Switch to _light mode"));
         Menu view = new Menu("_View");
         view.getItems().add(themeItem);
-        getMenus().addAll(file, view);
+        getMenus().addAll(file, goMenu, view);
 
         Menu admin = new Menu("_Admin");
         if (session.has(Permission.MANAGE_USERS)) {
