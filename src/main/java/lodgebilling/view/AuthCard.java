@@ -19,8 +19,9 @@ import lodgebilling.model.Theme;
 
 /**
  * Shared look for the sign-in and first-run screens: a frosted card over the
- * aurora night sky, with the app's title, a column of labelled inputs, an error
- * line and one main button. The light/dark switch sits in the top-right corner.
+ * moving beach (sunrise by day, sunset by night), with the app's title, a
+ * column of labelled inputs, an error line and one main button. The light/dark
+ * switch sits in the top-right corner.
  */
 public abstract class AuthCard extends StackPane {
 
@@ -28,7 +29,7 @@ public abstract class AuthCard extends StackPane {
 
     private final VBox card = new VBox(10);
     private final Label error = new Label();
-    private final AuroraBackground aurora = new AuroraBackground();
+    private final BeachBackground beach = new BeachBackground();
     private final ThemeToggle themeToggle;
     private final ObjectProperty<Theme> theme;
     private final ChangeListener<Theme> themeListener = (obs, old, now) -> Styles.apply(now, this);
@@ -62,13 +63,14 @@ public abstract class AuthCard extends StackPane {
         themeToggle.setFocusTraversable(false);
         StackPane.setAlignment(themeToggle, Pos.TOP_RIGHT);
 
-        aurora.setManaged(false);
+        beach.setManaged(false);
+        beach.bindTheme(theme);
         Styles.apply(theme.get(), this);
         theme.addListener(themeListener);
 
         setPadding(new Insets(24));
         setAlignment(Pos.CENTER);
-        getChildren().addAll(aurora, card, themeToggle);
+        getChildren().addAll(beach, card, themeToggle);
     }
 
     protected <T extends TextField> T field(String labelText, T input) {
@@ -132,7 +134,8 @@ public abstract class AuthCard extends StackPane {
 
     /** Stops the animation and lets go of the shared theme, for when this screen is replaced. */
     public void dispose() {
-        aurora.stop();
+        beach.stop();
+        beach.unbindTheme();
         theme.removeListener(themeListener);
     }
 
@@ -140,6 +143,6 @@ public abstract class AuthCard extends StackPane {
     protected void layoutChildren() {
         super.layoutChildren();
         // the backdrop ignores the padding and fills the whole window
-        aurora.resizeRelocate(0, 0, getWidth(), getHeight());
+        beach.resizeRelocate(0, 0, getWidth(), getHeight());
     }
 }
