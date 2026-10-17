@@ -54,7 +54,7 @@ public class MainView extends BorderPane {
     private final ScrollPane billingScroll;
     private final AppHeader header;
     private final PageContext pageContext;
-    private final AuroraBackground aurora = new AuroraBackground();
+    private final BeachBackground beach = new BeachBackground();
     // A frosted pane under every page, so text never sits straight on the bright sky
     private final StackPane pageArea = new StackPane();
     private VBox top;
@@ -77,9 +77,10 @@ public class MainView extends BorderPane {
         this.pageContext = new PageContext(stage, model, lodge, audit);
         pageContext.setRefreshCurrentPage(this::refreshCurrent);
 
-        // The aurora sits behind everything and fills the whole window
-        aurora.setManaged(false);
-        getChildren().add(aurora);
+        // The beach sits behind everything and fills the whole window
+        beach.setManaged(false);
+        beach.bindTheme(model.themeProperty());
+        getChildren().add(beach);
 
         billingScroll = new ScrollPane(buildBillingContent());
         billingScroll.setFitToWidth(true);
@@ -237,7 +238,8 @@ public class MainView extends BorderPane {
 
     /** Call before the scene switches to another screen (logout). */
     public void uninstall(Scene scene) {
-        aurora.stop();
+        beach.stop();
+        beach.unbindTheme();
         if (focusWatcher != null) {
             scene.focusOwnerProperty().removeListener(focusWatcher);
             focusWatcher = null;
@@ -248,7 +250,7 @@ public class MainView extends BorderPane {
     protected void layoutChildren() {
         super.layoutChildren();
         // the backdrop fills the whole window, behind the bars and the cards
-        aurora.resizeRelocate(0, 0, getWidth(), getHeight());
+        beach.resizeRelocate(0, 0, getWidth(), getHeight());
     }
 
     // ---------- What the controller can ask of the screen ----------
